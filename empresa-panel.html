@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Empresa - Big Agents Studio</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <span class="logo-ba">BA</span>
+                <div class="logo-text">
+                    <span class="logo-big">BIG AGENTS</span>
+                    <span class="logo-studio">STUDIO</span>
+                </div>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="empresa-panel.html" class="active">Mi Workspace</a></li>
+                <li><a href="#" onclick="logout()">Cerrar Sesión</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container" id="companyPanel">
+        <div class="dashboard-header">
+            <h1>Bienvenido, Innovation Corp</h1>
+            <p style="color: var(--text-gray);">Plan: <strong style="color: var(--accent-orange);">Professional</strong></p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
+            <div style="background: var(--secondary-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 25px;">
+                <div style="color: var(--text-gray); font-size: 14px; margin-bottom: 10px;">Agentes Activos</div>
+                <div style="font-size: 32px; font-weight: 700; color: var(--accent-orange);">3</div>
+            </div>
+            <div style="background: var(--secondary-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 25px;">
+                <div style="color: var(--text-gray); font-size: 14px; margin-bottom: 10px;">Interacciones (mes)</div>
+                <div style="font-size: 32px; font-weight: 700; color: var(--accent-cyan);">18,450</div>
+                <div style="color: var(--text-gray); font-size: 12px; margin-top: 5px;">de 50,000 disponibles</div>
+            </div>
+            <div style="background: var(--secondary-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 25px;">
+                <div style="color: var(--text-gray); font-size: 14px; margin-bottom: 10px;">Tiempo Ahorrado</div>
+                <div style="font-size: 32px; font-weight: 700; color: #4ade80;">247h</div>
+            </div>
+            <div style="background: var(--secondary-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 25px;">
+                <div style="color: var(--text-gray); font-size: 14px; margin-bottom: 10px;">Satisfacción</div>
+                <div style="font-size: 32px; font-weight: 700; color: var(--text-white);">94%</div>
+            </div>
+        </div>
+
+        <!-- My Agents -->
+        <div class="dashboard-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3>Mis Agentes de IA</h3>
+                <a href="mailto:Jrollon@gmail.com?subject=Solicitud de Nuevo Agente" class="btn-secondary" style="padding: 10px 20px; font-size: 14px;">
+                    + Solicitar Nuevo Agente
+                </a>
+            </div>
+
+            <div id="agentsList">
+                <div class="agent-card">
+                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                        <div class="agent-icon">🤖</div>
+                        <div style="flex: 1;">
+                            <h4>Agente de Atención al Cliente</h4>
+                            <p style="color: var(--text-gray); font-size: 14px; margin: 8px 0;">
+                                Gestiona consultas de clientes, tickets de soporte y respuestas automatizadas.
+                            </p>
+                            <div style="display: flex; gap: 20px; margin-top: 12px; font-size: 13px;">
+                                <span style="color: var(--text-gray);">Estado: <span class="status-active">Activo</span></span>
+                                <span style="color: var(--text-gray);">Interacciones: <strong style="color: white;">8,240</strong></span>
+                                <span style="color: var(--text-gray);">Satisfacción: <strong style="color: #4ade80;">96%</strong></span>
+                            </div>
+                        </div>
+                        <button class="btn-interact" onclick="interactWithAgent(1)">Abrir</button>
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                        <div class="agent-icon">📊</div>
+                        <div style="flex: 1;">
+                            <h4>Agente de Análisis de Datos</h4>
+                            <p style="color: var(--text-gray); font-size: 14px; margin: 8px 0;">
+                                Procesa datos de ventas, genera reportes y detecta patrones automáticamente.
+                            </p>
+                            <div style="display: flex; gap: 20px; margin-top: 12px; font-size: 13px;">
+                                <span style="color: var(--text-gray);">Estado: <span class="status-active">Activo</span></span>
+                                <span style="color: var(--text-gray);">Interacciones: <strong style="color: white;">5,890</strong></span>
+                                <span style="color: var(--text-gray);">Reportes: <strong style="color: #4ade80;">124</strong></span>
+                            </div>
+                        </div>
+                        <button class="btn-interact" onclick="interactWithAgent(2)">Abrir</button>
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                        <div class="agent-icon">📝</div>
+                        <div style="flex: 1;">
+                            <h4>Agente de Redacción de Contenido</h4>
+                            <p style="color: var(--text-gray); font-size: 14px; margin: 8px 0;">
+                                Crea artículos de blog, newsletters y contenido para redes sociales.
+                            </p>
+                            <div style="display: flex; gap: 20px; margin-top: 12px; font-size: 13px;">
+                                <span style="color: var(--text-gray);">Estado: <span class="status-active">Activo</span></span>
+                                <span style="color: var(--text-gray);">Interacciones: <strong style="color: white;">4,320</strong></span>
+                                <span style="color: var(--text-gray);">Documentos: <strong style="color: #4ade80;">87</strong></span>
+                            </div>
+                        </div>
+                        <button class="btn-interact" onclick="interactWithAgent(3)">Abrir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+            <div class="dashboard-card">
+                <h3>Actividad Reciente</h3>
+                <div style="margin-top: 20px;">
+                    <div style="padding: 15px; border-bottom: 1px solid rgba(255, 130, 67, 0.1);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-weight: 600;">Agente de Atención</span>
+                            <span style="color: var(--text-gray); font-size: 13px;">Hace 5 min</span>
+                        </div>
+                        <p style="color: var(--text-gray); font-size: 14px;">Resolvió 3 tickets de soporte</p>
+                    </div>
+                    <div style="padding: 15px; border-bottom: 1px solid rgba(255, 130, 67, 0.1);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-weight: 600;">Agente de Análisis</span>
+                            <span style="color: var(--text-gray); font-size: 13px;">Hace 1 hora</span>
+                        </div>
+                        <p style="color: var(--text-gray); font-size: 14px;">Generó reporte mensual de ventas</p>
+                    </div>
+                    <div style="padding: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-weight: 600;">Agente de Redacción</span>
+                            <span style="color: var(--text-gray); font-size: 13px;">Hace 3 horas</span>
+                        </div>
+                        <p style="color: var(--text-gray); font-size: 14px;">Creó 2 artículos para el blog</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Configuración de Cuenta</h3>
+                <div style="margin-top: 20px;">
+                    <div style="padding: 15px; border-bottom: 1px solid rgba(255, 130, 67, 0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>Plan Actual</strong>
+                                <p style="color: var(--text-gray); font-size: 13px; margin-top: 5px;">Professional - €1,299/mes</p>
+                            </div>
+                            <a href="precios.html" style="color: var(--accent-orange); font-size: 14px; text-decoration: none;">Actualizar</a>
+                        </div>
+                    </div>
+                    <div style="padding: 15px; border-bottom: 1px solid rgba(255, 130, 67, 0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>Próxima Factura</strong>
+                                <p style="color: var(--text-gray); font-size: 13px; margin-top: 5px;">01 de Enero, 2025</p>
+                            </div>
+                            <a href="#" style="color: var(--accent-orange); font-size: 14px; text-decoration: none;">Ver</a>
+                        </div>
+                    </div>
+                    <div style="padding: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>Soporte</strong>
+                                <p style="color: var(--text-gray); font-size: 13px; margin-top: 5px;">24/7 Prioritario</p>
+                            </div>
+                            <a href="contacto.html" style="color: var(--accent-orange); font-size: 14px; text-decoration: none;">Contactar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 Big Agents Studio. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        function interactWithAgent(id) {
+            alert(`Abriendo interfaz del agente #${id}...\n\nEn producción, esto abriría una interfaz de chat o panel específico del agente.`);
+        }
+
+        function logout() {
+            if (confirm('¿Cerrar sesión?')) {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

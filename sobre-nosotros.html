@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre Nosotros - Big Agents Studio</title>
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <span class="logo-ba">BA</span>
+                <div class="logo-text">
+                    <span class="logo-big">BIG AGENTS</span>
+                    <span class="logo-studio">STUDIO</span>
+                </div>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="servicios.html">Servicios</a></li>
+                <li><a href="precios.html">Precios</a></li>
+                <li><a href="sobre-nosotros.html" class="active">Nosotros</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+                <li><a href="login.html" class="btn-login">Acceder</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>Sobre Big Agents Studio</h1>
+            <p>Transformando empresas con inteligencia artificial especializada</p>
+        </div>
+    </section>
+
+    <section class="content-section">
+        <div class="container" style="max-width: 900px;">
+            <div style="text-align: center; margin-bottom: 60px;">
+                <h2 style="font-size: 36px; margin-bottom: 20px;">Nuestra Misión</h2>
+                <p style="font-size: 18px; color: var(--text-gray); line-height: 1.8;">
+                    Democratizar el acceso a la inteligencia artificial empresarial mediante agentes especializados que potencian el trabajo humano, automatizan procesos complejos y generan valor real en cada industria.
+                </p>
+            </div>
+
+            <div style="background: var(--secondary-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 50px; margin-bottom: 60px;">
+                <h2 style="font-size: 32px; margin-bottom: 30px; text-align: center;">¿Quiénes Somos?</h2>
+                <p style="color: var(--text-gray); font-size: 16px; line-height: 1.8; margin-bottom: 20px;">
+                    Big Agents Studio nace de la visión de un equipo multidisciplinario de expertos en inteligencia artificial, ingeniería de software y consultoría empresarial. Con más de 10 años de experiencia combinada en transformación digital, hemos identificado una necesidad crítica en el mercado: empresas que quieren adoptar IA pero no saben por dónde empezar o necesitan soluciones específicas para sus procesos únicos.
+                </p>
+                <p style="color: var(--text-gray); font-size: 16px; line-height: 1.8;">
+                    A diferencia de las soluciones genéricas de IA, nosotros diseñamos, configuramos y gobernamos agentes especializados que se integran perfectamente en los flujos de trabajo existentes de cada empresa, respetando su cultura organizacional y potenciando las capacidades de sus equipos humanos.
+                </p>
+            </div>
+
+            <h2 style="font-size: 32px; margin-bottom: 40px; text-align: center;">Nuestros Valores</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 60px;">
+                <div style="background: var(--secondary-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 15px;">🎯</div>
+                    <h3 style="margin-bottom: 15px; color: var(--accent-orange);">Especialización</h3>
+                    <p style="color: var(--text-gray); font-size: 14px;">Agentes diseñados específicamente para tu industria y procesos.</p>
+                </div>
+
+                <div style="background: var(--secondary-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 15px;">🤝</div>
+                    <h3 style="margin-bottom: 15px; color: var(--accent-orange);">Colaboración</h3>
+                    <p style="color: var(--text-gray); font-size: 14px;">IA que potencia a los humanos, no que los reemplaza.</p>
+                </div>
+
+                <div style="background: var(--secondary-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 15px;">🔒</div>
+                    <h3 style="margin-bottom: 15px; color: var(--accent-orange);">Seguridad</h3>
+                    <p style="color: var(--text-gray); font-size: 14px;">Protección máxima de tus datos y cumplimiento normativo.</p>
+                </div>
+
+                <div style="background: var(--secondary-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 15px;">⚡</div>
+                    <h3 style="margin-bottom: 15px; color: var(--accent-orange);">Innovación</h3>
+                    <p style="color: var(--text-gray); font-size: 14px;">Siempre a la vanguardia de la tecnología de IA.</p>
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, var(--secondary-dark), rgba(255, 130, 67, 0.05)); border: 1px solid var(--accent-orange); border-radius: 12px; padding: 50px; text-align: center;">
+                <h2 style="font-size: 32px; margin-bottom: 20px;">¿Por Qué Elegirnos?</h2>
+                <div style="display: grid; gap: 20px; text-align: left; margin-top: 30px;">
+                    <div style="display: flex; gap: 15px; align-items: start;">
+                        <span style="color: var(--accent-orange); font-size: 24px;">✓</span>
+                        <div>
+                            <h4 style="margin-bottom: 8px;">Experiencia Comprobada</h4>
+                            <p style="color: var(--text-gray); font-size: 14px;">Hemos implementado más de 50 agentes en empresas de diversos sectores.</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: start;">
+                        <span style="color: var(--accent-orange); font-size: 24px;">✓</span>
+                        <div>
+                            <h4 style="margin-bottom: 8px;">Equipo Multidisciplinario</h4>
+                            <p style="color: var(--text-gray); font-size: 14px;">Ingenieros, consultores y especialistas en IA trabajando juntos.</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: start;">
+                        <span style="color: var(--accent-orange); font-size: 24px;">✓</span>
+                        <div>
+                            <h4 style="margin-bottom: 8px;">Metodología Probada</h4>
+                            <p style="color: var(--text-gray); font-size: 14px;">Proceso de implementación optimizado para resultados rápidos.</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: start;">
+                        <span style="color: var(--accent-orange); font-size: 24px;">✓</span>
+                        <div>
+                            <h4 style="margin-bottom: 8px;">Soporte Continuo</h4>
+                            <p style="color: var(--text-gray); font-size: 14px;">Acompañamos tu transformación en cada paso del camino.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>¿Listo para conocernos mejor?</h2>
+                <p>Agenda una llamada con nuestro equipo</p>
+                <div class="cta-buttons">
+                    <a href="contacto.html" class="btn-cta">Contactar</a>
+                    <a href="servicios.html" class="btn-secondary">Ver Servicios</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="logo">
+                        <span class="logo-ba">BA</span>
+                        <div class="logo-text">
+                            <span class="logo-big">BIG AGENTS</span>
+                            <span class="logo-studio">STUDIO</span>
+                        </div>
+                    </div>
+                    <p class="footer-desc">Diseñamos, configuramos y gobernamos agentes de IA especializados.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <ul>
+                        <li><a href="servicios.html">Servicios</a></li>
+                        <li><a href="precios.html">Precios</a></li>
+                        <li><a href="sobre-nosotros.html">Sobre Nosotros</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <ul>
+                        <li>📞 +34 619 471 572</li>
+                        <li>✉️ Jrollon@gmail.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Big Agents Studio. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

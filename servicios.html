@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios - Big Agents Studio</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <span class="logo-ba">BA</span>
+                <div class="logo-text">
+                    <span class="logo-big">BIG AGENTS</span>
+                    <span class="logo-studio">STUDIO</span>
+                </div>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="servicios.html" class="active">Servicios</a></li>
+                <li><a href="precios.html">Precios</a></li>
+                <li><a href="sobre-nosotros.html">Nosotros</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+                <li><a href="login.html" class="btn-login">Acceder</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>Nuestros Servicios</h1>
+            <p>Agentes de IA especializados diseñados para transformar tu empresa</p>
+        </div>
+    </section>
+
+    <section class="content-section">
+        <div class="container">
+            <div class="content-grid">
+                <div class="service-card">
+                    <div class="service-icon">🤖</div>
+                    <h3>Agente de Atención al Cliente</h3>
+                    <p>Automatiza respuestas, gestiona tickets y proporciona soporte 24/7 con IA conversacional avanzada.</p>
+                    <ul style="margin-top: 20px; color: var(--text-gray); line-height: 2;">
+                        <li>✓ Respuestas instantáneas</li>
+                        <li>✓ Multicanal (chat, email, WhatsApp)</li>
+                        <li>✓ Integración con CRM</li>
+                        <li>✓ Escalado automático a humanos</li>
+                    </ul>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">📊</div>
+                    <h3>Agente de Análisis de Datos</h3>
+                    <p>Procesa grandes volúmenes de datos, genera informes y detecta patrones en tiempo real.</p>
+                    <ul style="margin-top: 20px; color: var(--text-gray); line-height: 2;">
+                        <li>✓ Dashboards automáticos</li>
+                        <li>✓ Predicción de tendencias</li>
+                        <li>✓ Alertas inteligentes</li>
+                        <li>✓ Visualización de datos</li>
+                    </ul>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">📝</div>
+                    <h3>Agente de Redacción</h3>
+                    <p>Genera contenido, documentos legales, informes y comunicaciones personalizadas.</p>
+                    <ul style="margin-top: 20px; color: var(--text-gray); line-height: 2;">
+                        <li>✓ Redacción de contratos</li>
+                        <li>✓ Informes ejecutivos</li>
+                        <li>✓ Content marketing</li>
+                        <li>✓ Corrección y revisión</li>
+                    </ul>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">💼</div>
+                    <h3>Agente de Gestión de RRHH</h3>
+                    <p>Automatiza procesos de selección, onboarding y gestión de talento.</p>
+                    <ul style="margin-top: 20px; color: var(--text-gray); line-height: 2;">
+                        <li>✓ Screening de candidatos</li>
+                        <li>✓ Entrevistas automatizadas</li>
+                        <li>✓ Evaluación de desempeño</li>
+                        <li>✓ Gestión de vacaciones</li>
+                    </ul>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">🔍</div>
+                    <h3>Agente de Investigación</h3>
+                    <p>Realiza búsquedas exhaustivas, análisis de mercado y vigilancia competitiva.</p>
+                    <ul style="margin-top: 20px; color: var(--text-gray); line-height: 2;">
+                        <li>✓ Análisis de competencia</li>
+                        <li>✓ Estudios de mercado</li>
+                        <li>✓ Inteligencia empresarial</li>
+                        <li>✓ Informes de tendencias</li>
+                    </ul>
+                </div>
+
+                <div class="service-card">
+                    <div class="service-icon">💰</div>
+                    <h3>Agente Financiero</h3>
+                    <p>Gestiona facturas, conciliaciones bancarias y análisis financiero automatizado.</p>
+                    <ul style="margin-top: 20px; color: var(--text-gray); line-height: 2;">
+                        <li>✓ Automatización contable</li>
+                        <li>✓ Análisis de gastos</li>
+                        <li>✓ Predicción de flujo de caja</li>
+                        <li>✓ Gestión de cobros</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>¿Necesitas un agente personalizado?</h2>
+                <p>Diseñamos agentes específicos para tus procesos de negocio</p>
+                <div class="cta-buttons">
+                    <a href="contacto.html" class="btn-cta">Solicitar Consulta</a>
+                    <a href="precios.html" class="btn-secondary">Ver Precios</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="logo">
+                        <span class="logo-ba">BA</span>
+                        <div class="logo-text">
+                            <span class="logo-big">BIG AGENTS</span>
+                            <span class="logo-studio">STUDIO</span>
+                        </div>
+                    </div>
+                    <p class="footer-desc">Diseñamos, configuramos y gobernamos agentes de IA especializados.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <ul>
+                        <li><a href="servicios.html">Servicios</a></li>
+                        <li><a href="precios.html">Precios</a></li>
+                        <li><a href="sobre-nosotros.html">Sobre Nosotros</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <ul>
+                        <li>📞 +34 619 471 572</li>
+                        <li>✉️ Jrollon@gmail.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Big Agents Studio. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

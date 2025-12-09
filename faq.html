@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Big Agents Studio</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <span class="logo-ba">BA</span>
+                <div class="logo-text">
+                    <span class="logo-big">BIG AGENTS</span>
+                    <span class="logo-studio">STUDIO</span>
+                </div>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="servicios.html">Servicios</a></li>
+                <li><a href="precios.html">Precios</a></li>
+                <li><a href="sobre-nosotros.html">Nosotros</a></li>
+                <li><a href="faq.html" class="active">FAQ</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+                <li><a href="login.html" class="btn-login">Acceder</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>Preguntas Frecuentes</h1>
+            <p>Encuentra respuestas a las dudas más comunes</p>
+        </div>
+    </section>
+
+    <div class="faq-container">
+        <div class="container">
+            <div class="faq-item">
+                <div class="faq-question">
+                    ¿Qué es un agente de IA especializado?
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Un agente de IA especializado es un sistema inteligente diseñado y entrenado específicamente para realizar tareas concretas dentro de tu empresa. A diferencia de soluciones genéricas, nuestros agentes se personalizan completamente para entender tus procesos, tu terminología y tus necesidades específicas.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    ¿Cuánto tiempo tarda la implementación?
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        El tiempo de implementación varía según la complejidad del proyecto. Para agentes estándar, el proceso suele tomar entre 2-4 semanas. Para desarrollos personalizados enterprise, puede extenderse hasta 6-8 semanas. Incluye fases de configuración, integración, pruebas y capacitación del equipo.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    ¿Los agentes reemplazan a mi equipo humano?
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        No, nuestros agentes están diseñados para complementar y potenciar a tu equipo humano, no para reemplazarlo. Se encargan de tareas repetitivas, procesamiento de datos y respuestas automáticas, liberando a tu equipo para que se enfoque en actividades estratégicas que requieren creatividad, empatía y criterio humano.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    ¿Cómo se garantiza la seguridad de nuestros datos?
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Implementamos múltiples capas de seguridad: cifrado end-to-end, servidores en Europa con cumplimiento GDPR, auditorías regulares, autenticación multifactor y políticas estrictas de acceso. Tus datos nunca se utilizan para entrenar modelos externos y puedes solicitar su eliminación en cualquier momento.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    ¿Puedo personalizar los agentes según mis necesidades?
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Absolutamente. Todos nuestros planes incluyen algún nivel de personalización. Los planes Professional y Enterprise permiten personalización profunda: desde el tono de comunicación, hasta flujos de trabajo específicos, integraciones con tus sistemas internos y diseño de agentes completamente nuevos para procesos únicos de tu empresa.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    ¿Qué tipo de soporte técnico ofrecen?
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        El plan Starter incluye soporte por email en horario laboral. Professional añade soporte prioritario 24/7 por chat y teléfono. Enterprise incluye un Account Manager dedicado, SLA garantizado y acceso directo al equipo técnico. Todos los planes incluyen documentación completa y actualizaciones automáticas.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    ¿Necesito conocimientos técnicos para usar los agentes?
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        No se requieren conocimientos técnicos. Nuestro panel de control es intuitivo y diseñado para usuarios de negocio. Incluimos capacitación inicial para tu equipo y documentación paso a paso. Para tareas más avanzadas, nuestro equipo de soporte está siempre disponible para ayudarte.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    ¿Puedo cambiar de plan en cualquier momento?
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Sí, puedes actualizar o cambiar tu plan en cualquier momento. Los upgrades son inmediatos. En caso de downgrades, los cambios se aplican al inicio del siguiente ciclo de facturación. No hay penalizaciones por cambiar de plan, y te ayudamos con la migración de configuraciones.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    ¿Qué sucede si excedo el límite de interacciones?
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Te notificamos cuando alcances el 80% de tu límite. Si lo excedes, puedes adquirir paquetes adicionales de interacciones o actualizar a un plan superior. No interrumpimos el servicio abruptamente; trabajamos contigo para encontrar la mejor solución según tus necesidades de crecimiento.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    ¿Ofrecen período de prueba?
+                </div>
+                <div class="faq-answer">
+                    <div class="faq-answer-content">
+                        Sí, ofrecemos una demo personalizada de 14 días donde configuramos un agente piloto para tu caso de uso específico. Esto te permite evaluar el valor real antes de comprometerte. Para planes Enterprise, podemos extender el período de evaluación según las necesidades del proyecto.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>¿Aún tienes dudas?</h2>
+                <p>Nuestro equipo está listo para ayudarte</p>
+                <div class="cta-buttons">
+                    <a href="contacto.html" class="btn-cta">Contactar</a>
+                    <a href="registro.html" class="btn-secondary">Solicitar Demo</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="logo">
+                        <span class="logo-ba">BA</span>
+                        <div class="logo-text">
+                            <span class="logo-big">BIG AGENTS</span>
+                            <span class="logo-studio">STUDIO</span>
+                        </div>
+                    </div>
+                    <p class="footer-desc">Diseñamos, configuramos y gobernamos agentes de IA especializados.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <ul>
+                        <li><a href="servicios.html">Servicios</a></li>
+                        <li><a href="precios.html">Precios</a></li>
+                        <li><a href="sobre-nosotros.html">Sobre Nosotros</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <ul>
+                        <li>📞 +34 619 471 572</li>
+                        <li>✉️ Jrollon@gmail.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Big Agents Studio. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Empresa - Big Agents Studio</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <span class="logo-ba">BA</span>
+                <div class="logo-text">
+                    <span class="logo-big">BIG AGENTS</span>
+                    <span class="logo-studio">STUDIO</span>
+                </div>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="servicios.html">Servicios</a></li>
+                <li><a href="precios.html">Precios</a></li>
+                <li><a href="sobre-nosotros.html">Nosotros</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+                <li><a href="login.html" class="btn-login">Acceder</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="form-container">
+        <h1 style="text-align: center; margin-bottom: 10px;">Registro de Empresa</h1>
+        <p style="text-align: center; color: var(--text-gray); margin-bottom: 40px;">
+            Completa el formulario para solicitar acceso a Big Agents Studio
+        </p>
+
+        <form id="registroForm" action="" method="POST">
+            <div class="form-group">
+                <label for="nombreEmpresa">Nombre de la Empresa *</label>
+                <input type="text" id="nombreEmpresa" name="nombreEmpresa" required 
+                       placeholder="Ej: Innovation Tech S.L.">
+            </div>
+
+            <div class="form-group">
+                <label for="cif">CIF/NIF *</label>
+                <input type="text" id="cif" name="cif" required 
+                       placeholder="Ej: B12345678">
+            </div>
+
+            <div class="form-group">
+                <label for="industria">Industria/Sector *</label>
+                <select id="industria" name="industria" required>
+                    <option value="">Selecciona una opción</option>
+                    <option value="tecnologia">Tecnología</option>
+                    <option value="finanzas">Finanzas y Banca</option>
+                    <option value="salud">Salud y Medicina</option>
+                    <option value="educacion">Educación</option>
+                    <option value="retail">Retail y E-commerce</option>
+                    <option value="manufactura">Manufactura</option>
+                    <option value="legal">Legal y Despachos</option>
+                    <option value="consultoria">Consultoría</option>
+                    <option value="inmobiliaria">Inmobiliaria</option>
+                    <option value="otro">Otro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tamano">Tamaño de la Empresa *</label>
+                <select id="tamano" name="tamano" required>
+                    <option value="">Selecciona una opción</option>
+                    <option value="1-10">1-10 empleados</option>
+                    <option value="11-50">11-50 empleados</option>
+                    <option value="51-200">51-200 empleados</option>
+                    <option value="201-500">201-500 empleados</option>
+                    <option value="500+">Más de 500 empleados</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="nombreContacto">Nombre del Contacto *</label>
+                <input type="text" id="nombreContacto" name="nombreContacto" required 
+                       placeholder="Tu nombre completo">
+            </div>
+
+            <div class="form-group">
+                <label for="cargoContacto">Cargo *</label>
+                <input type="text" id="cargoContacto" name="cargoContacto" required 
+                       placeholder="Ej: Director de Tecnología">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Corporativo *</label>
+                <input type="email" id="email" name="email" required 
+                       placeholder="tu.email@empresa.com">
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono *</label>
+                <input type="tel" id="telefono" name="telefono" required 
+                       placeholder="+34 600 000 000">
+            </div>
+
+            <div class="form-group">
+                <label for="sitioWeb">Sitio Web de la Empresa</label>
+                <input type="url" id="sitioWeb" name="sitioWeb" 
+                       placeholder="https://www.tuempresa.com">
+            </div>
+
+            <div class="form-group">
+                <label for="necesidades">¿Qué necesidades tiene tu empresa? *</label>
+                <textarea id="necesidades" name="necesidades" required 
+                          placeholder="Describe brevemente qué procesos quieres automatizar con agentes de IA..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="presupuesto">Presupuesto estimado mensual *</label>
+                <select id="presupuesto" name="presupuesto" required>
+                    <option value="">Selecciona un rango</option>
+                    <option value="0-500">0€ - 500€/mes</option>
+                    <option value="500-1500">500€ - 1.500€/mes</option>
+                    <option value="1500-5000">1.500€ - 5.000€/mes</option>
+                    <option value="5000+">Más de 5.000€/mes</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña para acceder a tu panel *</label>
+                <input type="password" id="password" name="password" required 
+                       minlength="8" placeholder="Mínimo 8 caracteres">
+                <small style="color: var(--text-gray); font-size: 13px; display: block; margin-top: 5px;">
+                    Esta contraseña la usarás para iniciar sesión después de ser aprobado
+                </small>
+            </div>
+
+            <div class="form-group" style="margin-top: 30px;">
+                <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" required style="width: auto; margin-top: 5px;">
+                    <span style="color: var(--text-gray); font-size: 14px;">
+                        Acepto los <a href="#" style="color: var(--accent-orange);">términos y condiciones</a> 
+                        y la <a href="#" style="color: var(--accent-orange);">política de privacidad</a> *
+                    </span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-submit">Enviar Solicitud de Registro</button>
+
+            <p style="text-align: center; margin-top: 20px; color: var(--text-gray); font-size: 14px;">
+                ¿Ya tienes cuenta? <a href="login.html" style="color: var(--accent-orange);">Inicia sesión aquí</a>
+            </p>
+        </form>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="logo">
+                        <span class="logo-ba">BA</span>
+                        <div class="logo-text">
+                            <span class="logo-big">BIG AGENTS</span>
+                            <span class="logo-studio">STUDIO</span>
+                        </div>
+                    </div>
+                    <p class="footer-desc">Diseñamos, configuramos y gobernamos agentes de IA especializados.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <ul>
+                        <li><a href="servicios.html">Servicios</a></li>
+                        <li><a href="precios.html">Precios</a></li>
+                        <li><a href="sobre-nosotros.html">Sobre Nosotros</a></li>
+                        <li><a href="faq.html">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <ul>
+                        <li>📞 +34 619 471 572</li>
+                        <li>✉️ jrollon@gmail.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Big Agents Studio. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
