@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+/*
+ * Paleta del dashboard — 3 colores de serie + neutros.
+ * El rojo queda RESERVADO a desviaciones negativas (abonos, vencidos, deltas malos).
+ * Los gráficos referencian estas variables, nunca hex sueltos.
+ */
+:root {
+  color-scheme: light;
+  --surface-1: #fcfcfb;   /* superficie de tarjeta/gráfico */
+  --page: #f4f4f1;        /* plano de página */
+  --ink-1: #0b0b0b;       /* texto primario */
+  --ink-2: #52514e;       /* texto secundario */
+  --ink-3: #898781;       /* ejes y etiquetas apagadas */
+  --grid: #e1e0d9;        /* rejilla, hairline */
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+
+  --c-blue: #2a78d6;      /* serie 1 — ingresos / principal */
+  --c-aqua: #1baf7a;      /* serie 2 — margen / positivo */
+  --c-orange: #eb6834;    /* serie 3 — pendiente / atención */
+  --c-red: #e34948;       /* SOLO desviaciones negativas */
+  --c-blue-soft: #9ec5f4;
+  --delta-good: #006300;  /* texto de variación positiva */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --page: #0d0d0d;
+    --ink-1: #ffffff;
+    --ink-2: #c3c2b7;
+    --ink-3: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+
+    --c-blue: #3987e5;
+    --c-aqua: #199e70;
+    --c-orange: #d95926;
+    --c-red: #e66767;
+    --c-blue-soft: #1c5cab;
+    --delta-good: #0ca30c;
+  }
+}
+
+html {
+  background: var(--page);
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--ink-1);
+  background: var(--page);
+}
+
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recharts: rejilla y ejes recesivos */
+.recharts-cartesian-grid line {
+  stroke: var(--grid);
+  stroke-width: 1;
+}
+.recharts-cartesian-axis-line,
+.recharts-cartesian-axis-tick-line {
+  stroke: var(--axis);
+}
+.recharts-text {
+  fill: var(--ink-3);
+  font-size: 11px;
+}
