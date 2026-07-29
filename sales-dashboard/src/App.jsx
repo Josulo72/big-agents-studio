@@ -43,6 +43,16 @@ export default function App() {
     }
   }, []);
 
+  // Autocarga opcional: si la página anfitriona inyecta el libro en base64
+  // (window.__XLSX_BASE64__), se carga al abrir. La app en sí no trae datos.
+  useEffect(() => {
+    const b64 = window.__XLSX_BASE64__;
+    if (!b64 || data) return;
+    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    loadFile(new File([bytes], window.__XLSX_NAME__ ?? 'Control_Ventas_Tornilleria.xlsx'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Arrastrar y soltar sobre toda la ventana
   useEffect(() => {
     const onDragOver = (e) => { e.preventDefault(); setDragging(true); };

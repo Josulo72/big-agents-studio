@@ -45,6 +45,26 @@
   }
 }
 
+/* Conmutador explícito de tema (data-theme) — debe ganar a la media query */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-1: #1a1a19;
+  --page: #0d0d0d;
+  --ink-1: #ffffff;
+  --ink-2: #c3c2b7;
+  --ink-3: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.1);
+
+  --c-blue: #3987e5;
+  --c-aqua: #199e70;
+  --c-orange: #d95926;
+  --c-red: #e66767;
+  --c-blue-soft: #1c5cab;
+  --delta-good: #0ca30c;
+}
+
 html {
   background: var(--page);
 }
