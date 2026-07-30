@@ -156,7 +156,9 @@ export default function App() {
 
       <header className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h1 className="text-lg font-bold leading-tight">Control de ventas · Tornillería</h1>
+          <h1 className="text-lg font-bold leading-tight">
+            Control de ventas{data?.parametros?.empresa ? ` · ${data.parametros.empresa}` : ''}
+          </h1>
           <p className="text-xs" style={{ color: 'var(--ink-3)' }}>
             {data
               ? <>Último dato: <span className="num">{fmtDate(ultimoDato)}</span> · Fichero: {fileMeta?.name} · Cargado {fileMeta?.loadedAt.toLocaleString('es-ES')}</>

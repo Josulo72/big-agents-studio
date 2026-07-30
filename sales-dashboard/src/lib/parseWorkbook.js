@@ -163,11 +163,14 @@ export function parseWorkbook(data) {
 
   if (errors.length) return { ok: false, errors };
 
+  // Nombre de empresa (Parametros!B5) — opcional, solo para la cabecera
+  const empresa = norm(cell('B5')) || null;
+
   return {
     ok: true,
     errors: [],
     ventas,
     gastos,
-    parametros: { objetivos, indiceAcero, comisionCanal, diasCobroCanal, portesPais },
+    parametros: { empresa, objetivos, indiceAcero, comisionCanal, diasCobroCanal, portesPais },
   };
 }
