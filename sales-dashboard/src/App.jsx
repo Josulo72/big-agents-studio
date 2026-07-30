@@ -100,9 +100,21 @@ export default function App() {
     [ventas, filters],
   );
 
-  const porPais = useMemo(() => byDimension(rows, 'pais'), [rows]);
-  const porCanal = useMemo(() => byDimension(rows, 'canal'), [rows]);
-  const porFamilia = useMemo(() => byDimension(rows, 'familia'), [rows]);
+  // Cada gráfico de composición ignora el filtro de su propia dimensión:
+  // así, al pulsar «España», los demás países siguen visibles (atenuados)
+  // y se puede cambiar o ampliar la selección con otro clic.
+  const porPais = useMemo(
+    () => (ventas ? byDimension(filterVentas(ventas, { ...filters, paises: [] }), 'pais') : []),
+    [ventas, filters],
+  );
+  const porCanal = useMemo(
+    () => (ventas ? byDimension(filterVentas(ventas, { ...filters, canales: [] }), 'canal') : []),
+    [ventas, filters],
+  );
+  const porFamilia = useMemo(
+    () => (ventas ? byDimension(filterVentas(ventas, { ...filters, familias: [] }), 'familia') : []),
+    [ventas, filters],
+  );
   const clientes = useMemo(() => topClientes(rows, 10), [rows]);
   const productos = useMemo(() => rankingProductos(rows), [rows]);
   const aging = useMemo(
