@@ -278,6 +278,68 @@ export function agingCartera(rows, refDate) {
   return buckets;
 }
 
+/**
+ * Comparativa interanual: mismos meses de calendario superpuestos por año.
+ * Recibe filas ya filtradas por dimensiones; el rango de fechas NO se aplica
+ * (comparar años exige verlos todos). La variación de cada ejercicio se
+ * calcula solo sobre los meses con dato en ambos años (periodo comparable),
+ * para no comparar un año completo contra otro parcial.
+ */
+export function comparativaAnual(rows) {
+  const byYM = new Map(); // 'YYYY-MM' → acumulados
+  for (const r of rows) {
+    const m = byYM.get(r.mes) ?? { ingresos: 0, margen: 0, pedidos: 0, meses: r.mes };
+    m.ingresos += r.ingresos;
+    m.margen += r.margen;
+    m.pedidos += r.pedidoUnico;
+    byYM.set(r.mes, m);
+  }
+  const years = [...new Set([...byYM.keys()].map((k) => k.slice(0, 4)))].sort();
+
+  const meses = Array.from({ length: 12 }, (_, i) => {
+    const mm = String(i + 1).padStart(2, '0');
+    const fila = { mm };
+    for (const y of years) {
+      const m = byYM.get(`${y}-${mm}`);
+      fila[y] = m
+        ? { ingresos: m.ingresos, margen: m.margen, margenPct: m.ingresos !== 0 ? m.margen / m.ingresos : null }
+        : null;
+    }
+    return fila;
+  });
+
+  const resumen = years.map((y, i) => {
+    const propios = [...byYM.entries()].filter(([k]) => k.startsWith(y));
+    const ingresos = propios.reduce((a, [, m]) => a + m.ingresos, 0);
+    const margen = propios.reduce((a, [, m]) => a + m.margen, 0);
+    const pedidos = propios.reduce((a, [, m]) => a + m.pedidos, 0);
+    let varComparable = null;
+    if (i > 0) {
+      const prev = years[i - 1];
+      const comunes = meses
+        .filter((f) => f[y] && f[prev])
+        .map((f) => f.mm);
+      const suma = (yy) => comunes.reduce((a, mm) => a + (byYM.get(`${yy}-${mm}`)?.ingresos ?? 0), 0);
+      const cur = suma(y);
+      const ant = suma(prev);
+      if (comunes.length && ant !== 0) {
+        varComparable = { pct: (cur - ant) / Math.abs(ant), meses: comunes, prevYear: prev };
+      }
+    }
+    return {
+      year: y,
+      ingresos,
+      margen,
+      margenPct: ingresos !== 0 ? margen / ingresos : null,
+      pedidos,
+      mesesConDato: [...byYM.keys()].filter((k) => k.startsWith(y)).length,
+      varComparable,
+    };
+  });
+
+  return { years, meses, resumen };
+}
+
 /** Valores únicos ordenados de una dimensión (para poblar los filtros). */
 export function distinctValues(rows, key) {
   return [...new Set(rows.map((r) => r[key]))].sort((a, b) =>

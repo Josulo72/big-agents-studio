@@ -3,7 +3,7 @@ import { parseWorkbook } from './lib/parseWorkbook.js';
 import {
   EMPTY_FILTERS, filterVentas, computeKpisWithDelta, monthlySeries,
   byDimension, topClientes, rankingProductos, agingCartera, distinctValues,
-  dataDateRange, dateShortcuts, hasDimensionFilter,
+  dataDateRange, dateShortcuts, hasDimensionFilter, comparativaAnual,
 } from './lib/calculations.js';
 import { fmtDate, fmtPct, ND } from './lib/format.js';
 import DropZone from './components/DropZone.jsx';
@@ -17,6 +17,7 @@ import TopClients from './components/TopClients.jsx';
 import ProductRanking from './components/ProductRanking.jsx';
 import AgingChart from './components/AgingChart.jsx';
 import DetailTable from './components/DetailTable.jsx';
+import YearComparison from './components/YearComparison.jsx';
 
 export default function App() {
   const [data, setData] = useState(null);        // resultado de parseWorkbook
@@ -90,6 +91,13 @@ export default function App() {
       ? monthlySeries(rows, data.parametros.objetivos, filters.desde, filters.hasta, !dimensioned)
       : []),
     [data, rows, filters, dimensioned],
+  );
+
+  // La comparativa de años aplica los filtros de dimensión pero ignora el
+  // rango de fechas: comparar ejercicios exige verlos todos.
+  const comparativa = useMemo(
+    () => (ventas ? comparativaAnual(filterVentas(ventas, { ...filters, desde: null, hasta: null })) : null),
+    [ventas, filters],
   );
 
   const porPais = useMemo(() => byDimension(rows, 'pais'), [rows]);
@@ -186,6 +194,13 @@ export default function App() {
             <ChartCard title="Margen de contribución % por mes"
               subtitle="Ingresos − coste de ventas − portes − comisión, sobre ingresos">
               <MarginChart data={monthly} />
+            </ChartCard>
+          </div>
+
+          <div className="mb-3">
+            <ChartCard title="Comparativa de años"
+              subtitle="Mismos meses de calendario superpuestos por ejercicio · aplica los filtros de dimensión e ignora el rango de fechas">
+              <YearComparison data={comparativa} />
             </ChartCard>
           </div>
 

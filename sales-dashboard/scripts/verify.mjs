@@ -10,6 +10,7 @@ import * as XLSX from 'xlsx';
 import { parseWorkbook } from '../src/lib/parseWorkbook.js';
 import {
   EMPTY_FILTERS, computeKpis, filterVentas, sumIngresos, dataDateRange,
+  comparativaAnual,
 } from '../src/lib/calculations.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -129,6 +130,24 @@ check(
   '6b. Hoja que falta produce un error explicativo',
   !parsed3.ok && parsed3.errors.some((e) => e.includes('Gastos')),
   parsed3.errors[0],
+);
+
+// ── 7. Comparativa interanual coherente con PL_Mensual ───────────────────────
+const comp = comparativaAnual(ventas);
+const r26 = comp.resumen.find((r) => r.year === '2026');
+const plMes = new Map(
+  pl
+    .filter((r) => r[0] instanceof Date && !isNaN(r[0]))
+    .map((r) => [r[0].toISOString().slice(0, 7), r[1]]),
+);
+const mesesComp = r26?.varComparable?.meses ?? [];
+const ant = mesesComp.reduce((a, mm) => a + (plMes.get(`2025-${mm}`) ?? 0), 0);
+const cur = mesesComp.reduce((a, mm) => a + (plMes.get(`2026-${mm}`) ?? 0), 0);
+const refPct = ant !== 0 ? (cur - ant) / ant : null;
+check(
+  '7. Comparativa 2026 vs 2025 (meses comparables) = PL_Mensual',
+  r26?.varComparable != null && refPct != null && close(r26.varComparable.pct, refPct, 1e-9),
+  `dashboard ${(r26?.varComparable?.pct * 100).toFixed(2)} % · PL ${(refPct * 100).toFixed(2)} % (${mesesComp.length} meses)`,
 );
 
 console.log(failures === 0 ? '\nTodos los criterios de aceptación se cumplen.' : `\n${failures} criterio(s) fallan.`);

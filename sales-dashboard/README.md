@@ -59,6 +59,11 @@ Definiciones clave (comentadas en la cabecera de `calculations.js`):
   en tramos de días desde el vencimiento teórico (col. W).
 - Los **atajos de fechas** se anclan a la última fecha con datos (jun-2026), no a hoy,
   para que «últimos 6 meses» nunca quede vacío con datos históricos.
+- La **comparativa de años** superpone los mismos meses de calendario por ejercicio
+  (ingresos, margen € o margen %). Aplica los filtros de dimensión pero ignora el
+  rango de fechas (comparar ejercicios exige verlos todos), y la variación
+  interanual se calcula solo sobre los **meses con dato en ambos años**, para no
+  comparar un año completo contra otro parcial.
 - El **CSV** se exporta con separador `;`, decimales con coma y BOM UTF-8 para que
   el Excel español lo abra directamente en columnas.
 
