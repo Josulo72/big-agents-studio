@@ -71,7 +71,7 @@ on conflict (id) do nothing;
 -- ---------- HELPERS INTERNOS ----------
 
 create or replace function public.padel_require_admin(p_pass text)
-returns void language plpgsql security definer set search_path = public as $$
+returns void language plpgsql security definer set search_path = public, extensions as $$
 declare t record;
 begin
   select * into t from padel_tournament where id = 1;
@@ -238,7 +238,7 @@ end $$;
 
 -- Inscripcion de una pareja
 create or replace function public.padel_signup(p_player1 text, p_player2 text, p_phone text)
-returns jsonb language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
 declare
   t record;
   v_code text;
@@ -377,7 +377,7 @@ begin
 end $$;
 
 create or replace function public.padel_admin_change_password(p_pass text, p_new text)
-returns jsonb language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
 begin
   perform padel_require_admin(p_pass);
   if length(coalesce(p_new,'')) < 6 then
@@ -389,7 +389,7 @@ begin
 end $$;
 
 create or replace function public.padel_admin_add_pair(p_pass text, p_player1 text, p_player2 text, p_phone text)
-returns jsonb language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
 declare v_code text; v_id int; n int;
 begin
   perform padel_require_admin(p_pass);
@@ -471,8 +471,9 @@ create or replace function public.padel_admin_reset_bracket(p_pass text)
 returns jsonb language plpgsql security definer set search_path = public as $$
 begin
   perform padel_require_admin(p_pass);
-  delete from padel_matches;
-  update padel_pairs set seed = null;
+  -- Supabase bloquea DELETE/UPDATE sin WHERE (safeupdate)
+  delete from padel_matches where true;
+  update padel_pairs set seed = null where true;
   update padel_tournament
      set status = 'registration', champion_id = null, bracket_visible = false, updated_at = now()
    where id = 1;
@@ -511,6 +512,7 @@ begin
     if m.bracket = 'GF' then
       update padel_tournament set champion_id = null, status = 'in_progress', updated_at = now() where id = 1;
     end if;
+    select * into m from padel_matches where id = p_match;
   end if;
 
   if m.status = 'pending' and not (m.pair1_id is not null and m.pair2_id is not null) then
