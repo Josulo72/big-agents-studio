@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin · Torneo de Pádel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/padel.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%232e6bff'/></svg>" />
+</head>
+<body>
+  <div class="wrap">
+    <!-- LOGIN -->
+    <section id="login-view">
+      <header class="topbar">
+        <div class="brand">
+          <div class="ball"></div>
+          <div><h1>Panel del organizador</h1><div class="sub">Torneo de pádel · doble eliminación</div></div>
+        </div>
+      </header>
+      <div class="card" style="max-width:420px;margin:3rem auto">
+        <h2>🔐 Acceso</h2>
+        <label>Contraseña de administrador</label>
+        <input type="password" id="login-pass" placeholder="••••••••" />
+        <button class="btn" id="btn-login">Entrar</button>
+        <div class="msg" id="login-msg"></div>
+      </div>
+    </section>
+
+    <!-- PANEL -->
+    <section id="panel-view" class="hidden">
+      <header class="topbar">
+        <div class="brand">
+          <div class="ball"></div>
+          <div><h1 id="a-name">Torneo de Pádel</h1><div class="sub">Panel del organizador</div></div>
+        </div>
+        <div>
+          <span id="a-status-badge"></span>
+          <button class="btn small secondary" id="btn-logout">Salir</button>
+        </div>
+      </header>
+
+      <div class="stat-row">
+        <div class="stat"><div class="num" id="st-pairs">–</div><div class="lbl">Parejas</div></div>
+        <div class="stat"><div class="num" id="st-played">–</div><div class="lbl">Partidos jugados</div></div>
+        <div class="stat"><div class="num" id="st-pending">–</div><div class="lbl">Pendientes</div></div>
+        <div class="stat"><div class="num" id="st-visible">–</div><div class="lbl">Cuadro público</div></div>
+      </div>
+
+      <nav class="tabs">
+        <button class="tab active" data-tab="control">Control</button>
+        <button class="tab" data-tab="parejas">Parejas</button>
+        <button class="tab" data-tab="calendario">Calendario</button>
+        <button class="tab" data-tab="partidos">Partidos</button>
+        <button class="tab" data-tab="cuadro">Cuadro</button>
+        <button class="tab" data-tab="config">Configuración</button>
+      </nav>
+
+      <!-- CONTROL -->
+      <section id="tab-control" class="tab-panel">
+        <div class="grid2">
+          <div class="card">
+            <h2>🚦 Estado del torneo</h2>
+            <p id="ctl-text" class="hint"></p>
+            <div class="check"><input type="checkbox" id="ctl-reg-open" /><span>Inscripción abierta</span></div>
+            <div class="check"><input type="checkbox" id="ctl-visible" /><span>Cuadro visible para los participantes</span></div>
+            <div class="msg" id="ctl-msg"></div>
+          </div>
+          <div class="card">
+            <h2>🎲 Sorteo del cuadro</h2>
+            <p class="hint">Cierra la inscripción, sortea el orden de las parejas y genera el cuadro completo de doble eliminación (con byes automáticos si no sale número exacto).</p>
+            <button class="btn" id="btn-draw">🎲 Sortear y generar cuadro</button>
+            <button class="btn danger" id="btn-reset">♻️ Reiniciar cuadro</button>
+            <div class="msg" id="draw-msg"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAREJAS -->
+      <section id="tab-parejas" class="tab-panel hidden">
+        <div class="card">
+          <h2>👥 Parejas inscritas <span class="hint" id="pairs-hint"></span></h2>
+          <div class="table-scroll"><table id="pairs-table"></table></div>
+          <button class="btn secondary" id="btn-add-pair">➕ Añadir pareja a mano</button>
+        </div>
+      </section>
+
+      <!-- CALENDARIO -->
+      <section id="tab-calendario" class="tab-panel hidden">
+        <div class="grid2">
+          <div class="card">
+            <h2>📅 Días y horas</h2>
+            <label>Días de juego</label>
+            <div id="days-list" style="margin-bottom:0.4rem"></div>
+            <input type="date" id="new-day" />
+            <button class="btn small secondary" id="btn-add-day" style="margin-top:0.5rem">Añadir día</button>
+            <div class="grid2">
+              <div><label>Hora de inicio</label><input type="time" id="cfg-start" /></div>
+              <div><label>Hora de fin</label><input type="time" id="cfg-end" /></div>
+            </div>
+            <label>Duración por partido (minutos)</label>
+            <input type="number" id="cfg-minutes" min="20" max="180" step="5" />
+            <label>Pistas (separadas por comas)</label>
+            <input type="text" id="cfg-courts" placeholder="Pista 1, Pista 2" />
+            <button class="btn" id="btn-save-schedule">💾 Guardar calendario</button>
+            <div class="msg" id="cal-msg"></div>
+          </div>
+          <div class="card">
+            <h2>⚡ Programación automática</h2>
+            <p class="hint">Asigna día, hora y pista a todos los partidos del cuadro respetando el orden de rondas (un partido nunca se programa antes que los que lo alimentan). Luego puedes retocar cualquier partido a mano en la pestaña "Partidos".</p>
+            <button class="btn" id="btn-autoschedule">⚡ Programar todos los partidos</button>
+            <div class="msg" id="auto-msg"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PARTIDOS -->
+      <section id="tab-partidos" class="tab-panel hidden">
+        <div class="card">
+          <h2>🎾 Partidos <span class="hint">pincha en un partido para poner resultado u horario</span></h2>
+          <div class="table-scroll"><table id="matches-table"></table></div>
+        </div>
+      </section>
+
+      <!-- CUADRO -->
+      <section id="tab-cuadro" class="tab-panel hidden">
+        <div id="a-bracket-area"><p class="hint">Aún no hay cuadro. Genera el sorteo desde la pestaña Control.</p></div>
+      </section>
+
+      <!-- CONFIG -->
+      <section id="tab-config" class="tab-panel hidden">
+        <div class="grid2">
+          <div class="card">
+            <h2>⚙️ Datos del torneo</h2>
+            <label>Nombre del torneo</label>
+            <input type="text" id="cfg-name" maxlength="80" />
+            <label>Club / dirección</label>
+            <input type="text" id="cfg-club" maxlength="120" placeholder="Nombre del club y dirección" />
+            <label>Número exacto de parejas (máx. 200)</label>
+            <input type="number" id="cfg-target" min="2" max="200" />
+            <div class="check"><input type="checkbox" id="cfg-doublefinal" /><span>Final con desempate (si el de perdedores gana la final, se juega otro partido)</span></div>
+            <button class="btn" id="btn-save-config">💾 Guardar</button>
+            <div class="msg" id="cfg-msg"></div>
+          </div>
+          <div class="card">
+            <h2>🔑 Cambiar contraseña</h2>
+            <label>Nueva contraseña (mínimo 6 caracteres)</label>
+            <input type="password" id="cfg-newpass" />
+            <button class="btn secondary" id="btn-change-pass">Cambiar contraseña</button>
+            <div class="msg" id="pass-msg"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <footer class="footer">Panel del organizador · solo tú puedes modificar el torneo</footer>
+  </div>
+
+  <!-- modal partido -->
+  <div class="modal-back hidden" id="match-modal">
+    <div class="modal">
+      <h3 id="mm-title">Partido</h3>
+      <div id="mm-players" class="hint" style="margin-bottom:0.6rem"></div>
+      <label>Ganador</label>
+      <select id="mm-winner"></select>
+      <label>Resultado (sets)</label>
+      <input type="text" id="mm-score" maxlength="40" placeholder="6-3 / 4-6 / 7-5" />
+      <button class="btn" id="mm-save-result">💾 Guardar resultado</button>
+      <hr style="border-color:rgba(255,255,255,0.1);margin:1rem 0" />
+      <label>Día y hora</label>
+      <input type="datetime-local" id="mm-when" />
+      <label>Pista</label>
+      <select id="mm-court"></select>
+      <button class="btn secondary" id="mm-save-schedule">🕐 Guardar horario</button>
+      <button class="btn secondary" id="mm-close">Cerrar</button>
+      <div class="msg" id="mm-msg"></div>
+    </div>
+  </div>
+
+  <!-- modal pareja -->
+  <div class="modal-back hidden" id="pair-modal">
+    <div class="modal">
+      <h3 id="pm-title">Pareja</h3>
+      <label>Jugador/a 1</label><input type="text" id="pm-p1" maxlength="60" />
+      <label>Jugador/a 2</label><input type="text" id="pm-p2" maxlength="60" />
+      <label>Teléfono</label><input type="tel" id="pm-phone" maxlength="30" />
+      <button class="btn" id="pm-save">💾 Guardar</button>
+      <button class="btn secondary" id="pm-close">Cancelar</button>
+      <div class="msg" id="pm-msg"></div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/bracket.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

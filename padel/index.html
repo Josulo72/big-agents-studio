@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Torneo de Pádel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/padel.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23d4ff3f'/></svg>" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        <div class="ball"></div>
+        <div>
+          <h1 id="t-name">Torneo de Pádel</h1>
+          <div class="sub" id="t-club"></div>
+        </div>
+      </div>
+      <div id="t-status-badge"></div>
+    </header>
+
+    <div id="champion-area"></div>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="inicio">Inicio</button>
+      <button class="tab" data-tab="inscripcion">Inscribirse</button>
+      <button class="tab" data-tab="mipareja">Mi pareja</button>
+      <button class="tab" data-tab="cuadro">Cuadro</button>
+    </nav>
+
+    <!-- INICIO -->
+    <section id="tab-inicio" class="tab-panel">
+      <div class="stat-row">
+        <div class="stat"><div class="num" id="s-pairs">–</div><div class="lbl">Parejas inscritas</div></div>
+        <div class="stat"><div class="num" id="s-target">–</div><div class="lbl">Plazas totales</div></div>
+        <div class="stat"><div class="num" id="s-days">–</div><div class="lbl">Días de juego</div></div>
+      </div>
+      <div class="card">
+        <h2>👋 Bienvenidos</h2>
+        <p id="home-text" class="hint">Cargando información del torneo…</p>
+        <div id="home-days" style="margin-top:0.8rem"></div>
+      </div>
+      <div class="card">
+        <h2>📋 Cómo funciona</h2>
+        <p class="hint">
+          1. Inscribid a vuestra pareja con el formulario · 2. Guardad el <b>código secreto</b> que os daremos ·
+          3. Cuando el organizador publique el cuadro veréis vuestro rival, día, hora y pista ·
+          4. Al terminar cada partido, una de las dos parejas mete el resultado con su código.
+          El torneo es de <b>doble eliminación</b>: si perdéis un partido, pasáis al cuadro de perdedores y seguís vivos.
+        </p>
+      </div>
+    </section>
+
+    <!-- INSCRIPCION -->
+    <section id="tab-inscripcion" class="tab-panel hidden">
+      <div class="card" style="max-width:560px">
+        <h2>✍️ Inscripción <span class="hint" id="insc-hint"></span></h2>
+        <div id="insc-form">
+          <label>Jugador/a 1</label>
+          <input type="text" id="f-p1" maxlength="60" placeholder="Nombre y apellido" />
+          <label>Jugador/a 2</label>
+          <input type="text" id="f-p2" maxlength="60" placeholder="Nombre y apellido" />
+          <label>Teléfono de contacto (opcional)</label>
+          <input type="tel" id="f-phone" maxlength="30" placeholder="600 000 000" />
+          <button class="btn" id="btn-signup">Inscribir pareja 🎾</button>
+          <div class="msg" id="insc-msg"></div>
+        </div>
+        <div id="insc-done" class="hidden">
+          <p>¡Inscripción completada! 🎉</p>
+          <div class="code-box">
+            <div class="hint">Vuestro código secreto (¡guardadlo, hacedle una foto!)</div>
+            <div class="the-code" id="insc-code"></div>
+            <div class="hint">Lo necesitaréis para ver vuestros partidos y enviar resultados.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MI PAREJA -->
+    <section id="tab-mipareja" class="tab-panel hidden">
+      <div class="card" style="max-width:560px">
+        <h2>🔑 Acceso de pareja</h2>
+        <label>Código secreto</label>
+        <input type="text" id="mp-code" maxlength="6" placeholder="A1B2C3" style="text-transform:uppercase" />
+        <button class="btn" id="btn-mypair">Ver mis partidos</button>
+        <div class="msg" id="mp-msg"></div>
+      </div>
+      <div id="mp-area"></div>
+    </section>
+
+    <!-- CUADRO -->
+    <section id="tab-cuadro" class="tab-panel hidden">
+      <div id="bracket-locked" class="card hidden">
+        <h2>🔒 Cuadro no publicado</h2>
+        <p class="hint">El organizador todavía no ha publicado el cuadro. En cuanto lo haga, aquí veréis todos los cruces, días y horas.</p>
+      </div>
+      <div id="bracket-area"></div>
+    </section>
+
+    <footer class="footer">Torneo gestionado con 🎾 — doble eliminación · máximo 200 parejas</footer>
+  </div>
+
+  <!-- modal resultado -->
+  <div class="modal-back hidden" id="result-modal">
+    <div class="modal">
+      <h3>📝 Enviar resultado</h3>
+      <p class="hint" id="rm-title"></p>
+      <label>¿Quién ha ganado?</label>
+      <select id="rm-winner"></select>
+      <label>Resultado (sets)</label>
+      <input type="text" id="rm-score" maxlength="40" placeholder="6-3 / 4-6 / 7-5" />
+      <button class="btn" id="rm-send">Enviar resultado</button>
+      <button class="btn secondary" id="rm-cancel">Cancelar</button>
+      <div class="msg" id="rm-msg"></div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/bracket.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
