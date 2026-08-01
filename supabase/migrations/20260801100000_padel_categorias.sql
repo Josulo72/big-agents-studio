@@ -98,7 +98,7 @@ begin
     'bracket_visible', t.bracket_visible,
     'target_pairs', t.target_pairs,
     'pairs_count', (select count(*) from padel_pairs),
-    'days', t.schedule_config->'days',
+    'days', case when t.bracket_visible then t.schedule_config->'days' else '[]'::jsonb end,
     'categories', t.categories,
     'champions', coalesce((
       select jsonb_object_agg(k.key, jsonb_build_object(
