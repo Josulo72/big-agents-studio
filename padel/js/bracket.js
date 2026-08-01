@@ -259,7 +259,7 @@
 
   const SVG_DEFS = `<defs>
     <linearGradient id="gradLime" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#d5582e"/><stop offset="100%" stop-color="#ffb03a"/>
+      <stop offset="0%" stop-color="#93af23"/><stop offset="100%" stop-color="#d8ff3a"/>
     </linearGradient>
     <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
       <feGaussianBlur stdDeviation="1.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>

@@ -6,7 +6,7 @@
   <title>Admin · Torneo de Pádel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Barlow+Condensed:ital,wght@0,600;0,700;1,800;1,900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/padel.css?v=8" />
+  <link rel="stylesheet" href="css/padel.css?v=9" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%232e6bff'/></svg>" />
 </head>
 <body>
@@ -15,24 +15,7 @@
     <section id="login-view">
       <header class="topbar">
         <div class="brand">
-          <svg class="ball" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="Pelota de padel Ponferrada 3.0">
-          <defs>
-            <radialGradient id="ballGradB" cx="35%" cy="28%" r="80%">
-              <stop offset="0%" stop-color="#fbffc4"/>
-              <stop offset="40%" stop-color="#e3f462"/>
-              <stop offset="78%" stop-color="#c3dc3c"/>
-              <stop offset="100%" stop-color="#93af23"/>
-            </radialGradient>
-            <path id="ballCurveB" d="M 22 62 Q 50 50 78 62" fill="none"/>
-          </defs>
-          <circle cx="50" cy="50" r="48" fill="url(#ballGradB)"/>
-          <path d="M 16 15 C 44 36, 44 64, 16 85" fill="none" stroke="#f7fbe0" stroke-width="4.5" stroke-linecap="round" opacity="0.95"/>
-          <path d="M 84 15 C 56 36, 56 64, 84 85" fill="none" stroke="#f7fbe0" stroke-width="4.5" stroke-linecap="round" opacity="0.95"/>
-          <ellipse cx="37" cy="27" rx="15" ry="9" fill="#ffffff" opacity="0.35"/>
-          <text font-size="8.2" font-weight="800" fill="#2a3510" letter-spacing="0.5" font-family="Arial, sans-serif">
-            <textPath href="#ballCurveB" startOffset="50%" text-anchor="middle">PONFERRADA 3.0</textPath>
-          </text>
-        </svg>
+          <div class="p3-badge">P3</div>
           <div><h1>Panel del organizador</h1><div class="sub">Torneo de pádel · doble eliminación</div></div>
         </div>
       </header>
@@ -49,24 +32,7 @@
     <section id="panel-view" class="hidden">
       <header class="topbar">
         <div class="brand">
-          <svg class="ball" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="Pelota de padel Ponferrada 3.0">
-          <defs>
-            <radialGradient id="ballGrad" cx="35%" cy="28%" r="80%">
-              <stop offset="0%" stop-color="#fbffc4"/>
-              <stop offset="40%" stop-color="#e3f462"/>
-              <stop offset="78%" stop-color="#c3dc3c"/>
-              <stop offset="100%" stop-color="#93af23"/>
-            </radialGradient>
-            <path id="ballCurve" d="M 22 62 Q 50 50 78 62" fill="none"/>
-          </defs>
-          <circle cx="50" cy="50" r="48" fill="url(#ballGrad)"/>
-          <path d="M 16 15 C 44 36, 44 64, 16 85" fill="none" stroke="#f7fbe0" stroke-width="4.5" stroke-linecap="round" opacity="0.95"/>
-          <path d="M 84 15 C 56 36, 56 64, 84 85" fill="none" stroke="#f7fbe0" stroke-width="4.5" stroke-linecap="round" opacity="0.95"/>
-          <ellipse cx="37" cy="27" rx="15" ry="9" fill="#ffffff" opacity="0.35"/>
-          <text font-size="8.2" font-weight="800" fill="#2a3510" letter-spacing="0.5" font-family="Arial, sans-serif">
-            <textPath href="#ballCurve" startOffset="50%" text-anchor="middle">PONFERRADA 3.0</textPath>
-          </text>
-        </svg>
+          <div class="p3-badge">P3</div>
           <div>
             <div class="brand-club">PADEL INDOOR <span>PONFERRADA 3.0</span></div>
             <h1 id="a-name">Torneo de Pádel</h1>
@@ -250,9 +216,9 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=8"></script>
-  <script src="js/api.js?v=8"></script>
-  <script src="js/bracket.js?v=8"></script>
-  <script src="js/admin.js?v=8"></script>
+  <script src="js/config.js?v=9"></script>
+  <script src="js/api.js?v=9"></script>
+  <script src="js/bracket.js?v=9"></script>
+  <script src="js/admin.js?v=9"></script>
 </body>
 </html>
