@@ -69,14 +69,8 @@ body::before {
 .topbar > * { position: relative; z-index: 1; }
 .brand { display: flex; align-items: center; gap: 0.7rem; }
 .brand .ball {
-  width: 54px; height: 54px; border-radius: 50%;
-  background: radial-gradient(circle at 32% 30%, #f6ff9e, #dcf25c 55%, #b7d834);
-  position: relative; box-shadow: 0 0 24px rgba(220, 242, 92, 0.4);
-}
-.brand .ball::after {
-  content: ""; position: absolute; inset: 0; border-radius: 50%;
-  border: 2px solid rgba(11, 18, 32, 0.35);
-  clip-path: polygon(0 18%, 100% 18%, 100% 30%, 0 30%, 0 70%, 100% 70%, 100% 82%, 0 82%);
+  width: 62px; height: 62px; flex-shrink: 0;
+  filter: drop-shadow(0 0 16px rgba(220, 242, 92, 0.55));
 }
 .brand h1 {
   font-size: 2.1rem; font-weight: 900; font-style: italic;
