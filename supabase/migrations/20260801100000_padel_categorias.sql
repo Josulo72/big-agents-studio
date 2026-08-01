@@ -13,6 +13,12 @@ alter table public.padel_pairs
 alter table public.padel_matches
   add column if not exists category text not null default 'General';
 
+-- la posicion de un partido es unica dentro de su categoria (no globalmente)
+alter table public.padel_matches
+  drop constraint if exists padel_matches_bracket_round_position_key;
+create unique index if not exists padel_matches_cat_bracket_round_pos
+  on public.padel_matches (category, bracket, round, position);
+
 -- ---------- helpers ----------
 
 create or replace function public.padel_apply_result(
