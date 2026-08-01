@@ -177,7 +177,10 @@
     return list.sort((a, b) => a.stage - b.stage || a.round - b.round || a.position - b.position);
   }
 
-  // ---------- RENDERIZADO ----------
+  // ---------- RENDERIZADO (arbol clasico con lineas conectoras) ----------
+
+  const CARD_W = 224, CARD_H = 104, GAP_X = 52, GAP_Y = 22;
+  const COL_W = CARD_W + GAP_X, U = CARD_H + GAP_Y, TOP_PAD = 46;
 
   function pairName(pairsById, id, short) {
     const p = pairsById[id];
@@ -210,66 +213,142 @@
     return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
 
-  function matchCard(pairsById, m, highlightId, onClickAttr) {
+  function matchCard(pairsById, m, x, y, highlightId, clickable) {
+    if (m.status === "void") return ""; // hueco estructural: se deja el espacio vacio
     const when = fmtWhen(m);
+    const isGF = m.bracket === "GF";
     return `
-      <div class="match-card status-${m.status}" data-match="${m.id || m.code}" ${onClickAttr || ""}>
-        <div class="match-head"><span class="match-code">${m.code}</span>${
+      <div class="match-card status-${m.status} ${isGF ? "gf-card" : ""}"
+           style="left:${x}px;top:${y}px" data-match="${m.id || m.code}" ${clickable ? 'data-clickable="1"' : ""}>
+        <div class="match-head"><span class="match-code">${isGF ? (m.round === 1 ? "🏆 GRAN FINAL" : "🔥 DESEMPATE") : m.code}</span>${
           m.score ? `<span class="match-score">${escapeHtml(m.score)}</span>` : ""
-        }${m.status === "bye" ? '<span class="match-score">bye</span>' : ""}</div>
+        }${m.status === "bye" ? '<span class="match-score">pasa directo</span>' : ""}</div>
         ${slotHtml(pairsById, m, 1, highlightId)}
         ${slotHtml(pairsById, m, 2, highlightId)}
         ${when ? `<div class="match-when">${when}</div>` : ""}
       </div>`;
   }
 
-  // Renderiza los tres cuadros en el contenedor dado
+  // Nombre de ronda segun cuantos partidos quedan en ella
+  function roundName(count, isLast) {
+    if (count === 1) return isLast ? "Final" : "Ronda final";
+    if (count === 2) return "Semifinales";
+    if (count === 4) return "Cuartos";
+    if (count === 8) return "Octavos";
+    if (count === 16) return "Dieciseisavos";
+    return null;
+  }
+
+  // Dibuja un arbol: cols = [{title, matches:[{m,y}]}] ya posicionados
+  function treeHtml(title, subtitle, cols, links, pairsById, opts, extraClass) {
+    if (!cols.length) return "";
+    const width = cols.length * COL_W - GAP_X + 8;
+    let height = 0;
+    for (const c of cols) for (const it of c.items) height = Math.max(height, it.y + CARD_H);
+    height += 10;
+
+    let cards = "", labels = "";
+    cols.forEach((c, i) => {
+      labels += `<div class="round-label" style="left:${i * COL_W}px;width:${CARD_W}px">${c.title}</div>`;
+      for (const it of c.items) {
+        cards += matchCard(pairsById, it.m, i * COL_W, it.y + TOP_PAD, opts.highlightId, opts.clickable);
+      }
+    });
+
+    let paths = "";
+    for (const l of links) {
+      const x1 = l.fromCol * COL_W + CARD_W, y1 = l.fromY + TOP_PAD + CARD_H / 2;
+      const x2 = l.toCol * COL_W, y2 = l.toY + TOP_PAD + CARD_H / 2;
+      const midX = x1 + GAP_X / 2;
+      const color = l.done ? "rgba(212,255,63,0.55)" : "rgba(147,160,189,0.22)";
+      paths += `<path d="M ${x1} ${y1} H ${midX} V ${y2} H ${x2}" fill="none" stroke="${color}" stroke-width="2"/>`;
+    }
+
+    return `<section class="bracket-section ${extraClass || ""}">
+        <h3 class="bracket-title">${title} ${subtitle ? `<span class="hint">${subtitle}</span>` : ""}</h3>
+        <div class="bracket-scroll"><div class="bracket-canvas" style="width:${width}px;height:${height + TOP_PAD}px">
+          <svg class="connectors" width="${width}" height="${height + TOP_PAD}">${paths}</svg>
+          ${labels}${cards}
+        </div></div>
+      </section>`;
+  }
+
+  // Renderiza los cuadros (ganadores+final y perdedores) como arboles conectados
   function render(container, matches, pairs, opts) {
     opts = opts || {};
     const pairsById = {};
     for (const p of pairs) pairsById[p.id] = p;
 
-    const groups = { W: {}, L: {}, GF: {} };
+    const byBracket = { W: {}, L: {}, GF: {} };
+    for (const m of matches) {
+      (byBracket[m.bracket][m.round] = byBracket[m.bracket][m.round] || []).push(m);
+    }
+    for (const b of Object.keys(byBracket))
+      for (const r of Object.keys(byBracket[b]))
+        byBracket[b][r].sort((a, b2) => a.position - b2.position);
+
+    // ---- Cuadro principal: rondas W + Gran Final ----
+    const wRounds = Object.keys(byBracket.W).map(Number).sort((a, b) => a - b);
+    const R = wRounds.length ? Math.max(...wRounds) : 0;
+    const cols = [], links = [], pos = {}; // code -> {col, y}
+
+    const yW = (r, p) => p * U * Math.pow(2, r - 1) + ((Math.pow(2, r - 1) - 1) * U) / 2;
+
+    for (const r of wRounds) {
+      const ms = byBracket.W[r];
+      const total = Math.pow(2, R - r); // partidos estructurales de la ronda
+      const items = ms.map(m => {
+        const y = yW(r, m.position - 1);
+        pos[m.code] = { col: r - 1, y };
+        return { m, y };
+      });
+      cols.push({ title: r === R ? "Final de ganadores" : roundName(total, false) || `Ronda ${r}`, items });
+    }
+    const gf1 = (byBracket.GF[1] || [])[0];
+    const gf2 = (byBracket.GF[2] || [])[0];
+    if (gf1) {
+      const y = R ? yW(R, 0) : 0;
+      pos[gf1.code] = { col: cols.length, y };
+      cols.push({ title: "Gran Final", items: [{ m: gf1, y }] });
+      if (gf2 && gf2.status !== "void") {
+        pos[gf2.code] = { col: cols.length, y };
+        cols.push({ title: "Desempate", items: [{ m: gf2, y }] });
+        links.push({ fromCol: pos[gf1.code].col, fromY: y, toCol: pos[gf2.code].col, toY: y,
+                     done: gf2.status === "ready" || !!gf2.winner_id });
+      }
+    }
     for (const m of matches) {
       if (m.status === "void") continue;
-      (groups[m.bracket][m.round] = groups[m.bracket][m.round] || []).push(m);
+      if (m.bracket === "L") continue;
+      const from = pos[m.code], to = m.win_next_code && pos[m.win_next_code];
+      if (from && to)
+        links.push({ fromCol: from.col, fromY: from.y, toCol: to.col, toY: to.y, done: !!m.winner_id });
     }
 
-    function roundTitle(bracket, r, totalRounds) {
-      if (bracket === "GF") return r === 1 ? "Gran Final" : "Desempate";
-      if (bracket === "W") {
-        if (r === totalRounds) return "Final de ganadores";
-        if (r === totalRounds - 1) return "Semifinales";
-        return `Ronda ${r}`;
-      }
-      return `Perdedores R${r}`;
+    // ---- Cuadro de perdedores ----
+    const lRounds = Object.keys(byBracket.L).map(Number).sort((a, b) => a - b);
+    const lCols = [], lLinks = [], lPos = {};
+    for (const o of lRounds) {
+      const j = Math.ceil(o / 2); // bloque: rondas 2j-1 y 2j comparten altura
+      const ms = byBracket.L[o];
+      const items = ms.map(m => {
+        const y = (m.position - 1) * U * Math.pow(2, j - 1) + ((Math.pow(2, j - 1) - 1) * U) / 2;
+        lPos[m.code] = { col: lCols.length, y };
+        return { m, y };
+      });
+      const isLast = o === Math.max(...lRounds);
+      lCols.push({ title: isLast ? "Final de repesca" : `Repesca ${o}`, items });
     }
-
-    function bracketHtml(key, title, cssClass) {
-      const rounds = Object.keys(groups[key]).map(Number).sort((a, b) => a - b);
-      if (!rounds.length) return "";
-      const total = Math.max(...rounds);
-      const cols = rounds
-        .map(r => {
-          const ms = groups[key][r].sort((a, b) => a.position - b.position);
-          return `<div class="bracket-round">
-              <div class="round-title">${roundTitle(key, r, total)}</div>
-              <div class="round-matches">${ms
-                .map(m => matchCard(pairsById, m, opts.highlightId, opts.clickable ? 'data-clickable="1"' : ""))
-                .join("")}</div>
-            </div>`;
-        })
-        .join("");
-      return `<section class="bracket-section ${cssClass}">
-          <h3 class="bracket-title">${title}</h3>
-          <div class="bracket-scroll"><div class="bracket-grid">${cols}</div></div>
-        </section>`;
+    for (const m of matches) {
+      if (m.bracket !== "L" || m.status === "void") continue;
+      const from = lPos[m.code], to = m.win_next_code && lPos[m.win_next_code];
+      if (from && to)
+        lLinks.push({ fromCol: from.col, fromY: from.y, toCol: to.col, toY: to.y, done: !!m.winner_id });
     }
 
     container.innerHTML =
-      bracketHtml("W", "🏆 Cuadro principal", "bracket-w") +
-      bracketHtml("L", "🔁 Cuadro de perdedores (repesca)", "bracket-l") +
-      bracketHtml("GF", "🌟 Gran final", "bracket-gf");
+      treeHtml("🏆 Cuadro principal", "quien pierde baja a la repesca", cols, links, pairsById, opts, "bracket-w") +
+      treeHtml("🔁 Cuadro de perdedores", "segunda vida: el ganador de la repesca juega la Gran Final", lCols, lLinks, pairsById, opts, "bracket-l");
   }
 
   window.PadelBracket = { generate, render, pairName, fmtWhen, escapeHtml };
