@@ -4,6 +4,7 @@
   const esc = PadelBracket.escapeHtml;
   let state = null;
   let myData = null;
+  let currentCat = null;
 
   // ---------- pestañas ----------
   document.querySelectorAll(".tab").forEach(t =>
@@ -12,6 +13,7 @@
       t.classList.add("active");
       document.querySelectorAll(".tab-panel").forEach(p => p.classList.add("hidden"));
       $("tab-" + t.dataset.tab).classList.remove("hidden");
+      if (t.dataset.tab === "cuadro") PadelBracket.centerScroll($("bracket-area"));
     })
   );
 
@@ -77,12 +79,13 @@
     }
     $("home-text").textContent = txt;
 
-    // campeones
-    $("champion-area").innerHTML = state.champion
-      ? `<div class="champion-banner"><div class="trophy">🏆</div>
-           <div class="names">${esc(state.champion.player1)} y ${esc(state.champion.player2)}</div>
-           <div class="hint">¡Campeones del torneo!</div></div>`
-      : "";
+    // campeones por categoria
+    const champs = state.champions || {};
+    $("champion-area").innerHTML = Object.keys(champs)
+      .map(cat => `<div class="champion-banner"><div class="trophy">🏆</div>
+           <div class="names">${esc(champs[cat].player1)} y ${esc(champs[cat].player2)}</div>
+           <div class="hint">¡Campeones${Object.keys(champs).length > 1 || cat !== "General" ? " · " + esc(cat) : " del torneo"}!</div></div>`)
+      .join("");
 
     // inscripcion
     const open = state.status === "registration" && state.registration_open &&
@@ -91,15 +94,42 @@
       ? `(${state.pairs_count}/${state.target_pairs} parejas)`
       : "— cerrada";
     $("btn-signup").disabled = !open;
+    const cats = state.categories || ["General"];
+    if (cats.length > 1) {
+      $("f-cat-row").classList.remove("hidden");
+      const prev = $("f-cat").value;
+      $("f-cat").innerHTML = cats.map(c => `<option ${c === prev ? "selected" : ""}>${esc(c)}</option>`).join("");
+    } else {
+      $("f-cat-row").classList.add("hidden");
+    }
 
     // cuadro
     if (state.bracket_visible && state.matches && state.matches.length) {
       $("bracket-locked").classList.add("hidden");
-      PadelBracket.render($("bracket-area"), state.matches, state.pairs || [], {});
+      renderBracketArea();
     } else {
       $("bracket-locked").classList.remove("hidden");
+      $("cat-chips").innerHTML = "";
       $("bracket-area").innerHTML = "";
     }
+  }
+
+  function renderBracketArea() {
+    const withMatches = (state.categories || ["General"])
+      .filter(c => (state.matches || []).some(m => m.category === c));
+    if (!withMatches.length) { $("bracket-area").innerHTML = ""; return; }
+    if (!currentCat || !withMatches.includes(currentCat)) currentCat = withMatches[0];
+    $("cat-chips").innerHTML = withMatches.length > 1
+      ? withMatches.map(c =>
+          `<button class="cat-chip ${c === currentCat ? "active" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("")
+      : "";
+    document.querySelectorAll("#cat-chips [data-cat]").forEach(b =>
+      b.addEventListener("click", () => { currentCat = b.dataset.cat; renderBracketArea(); }));
+    PadelBracket.render(
+      $("bracket-area"),
+      state.matches.filter(m => m.category === currentCat),
+      state.pairs || [], {}
+    );
   }
 
   // ---------- inscripcion ----------
@@ -108,7 +138,8 @@
     if (!p1 || !p2) return showMsg("insc-msg", "Escribid el nombre de los dos jugadores", false);
     $("btn-signup").disabled = true;
     try {
-      const r = await PadelAPI.signup(p1, p2, ph);
+      const cat = $("f-cat-row").classList.contains("hidden") ? null : $("f-cat").value;
+      const r = await PadelAPI.signup(p1, p2, ph, cat);
       $("insc-form").classList.add("hidden");
       $("insc-done").classList.remove("hidden");
       $("insc-code").textContent = r.code;
@@ -150,11 +181,13 @@
     const next = ms.find(m => m.status === "ready");
     if (next) {
       const rival = next.pair1 && next.pair1.id === p.id ? next.pair2 : next.pair1;
+      const inRepesca = next.bracket === "L";
       html += `<div class="card" style="background:rgba(46,107,255,0.1);border-color:rgba(46,107,255,0.45)">
-        <h2>⏭️ Próximo partido <span class="hint">(${next.code})</span></h2>
+        <h2>⏭️ Próximo partido <span class="hint">(${PadelBracket.displayCode(next.code)}${inRepesca ? " · repesca" : ""})</span></h2>
         <p><b>Rival:</b> ${rival ? esc(rival.player1) + " y " + esc(rival.player2) : "por decidir"}</p>
         <p><b>Cuándo:</b> ${PadelBracket.fmtWhen(next) || "pendiente de horario"}</p>
         <button class="btn small" data-report="${next.id}">📝 Enviar resultado</button>
+        ${inRepesca ? `<button class="btn small danger" data-withdraw="${next.id}" style="margin-left:0.5rem">🚪 No queremos jugar la repesca</button>` : ""}
       </div>`;
     } else if (ms.length && ms.every(m => m.status !== "ready" && m.status !== "pending")) {
       html += `<p class="hint">No tenéis partidos pendientes ahora mismo.</p>`;
@@ -170,7 +203,7 @@
         const won = m.winner_id === p.id;
         res = (won ? "✅ Ganado" : "❌ Perdido") + (m.score ? " · " + esc(m.score) : m.status === "bye" ? " (bye)" : "");
       }
-      html += `<tr><td>${m.code}</td>
+      html += `<tr><td>${PadelBracket.displayCode(m.code)}${m.bracket === "L" ? ' <span class="hint">(repesca)</span>' : ""}</td>
         <td>${rival ? esc(rival.player1) + " / " + esc(rival.player2) : "<i>por decidir</i>"}</td>
         <td>${PadelBracket.fmtWhen(m) || "—"}</td><td>${res}</td></tr>`;
     }
@@ -179,6 +212,18 @@
 
     document.querySelectorAll("[data-report]").forEach(b =>
       b.addEventListener("click", () => openResultModal(parseInt(b.dataset.report, 10)))
+    );
+    document.querySelectorAll("[data-withdraw]").forEach(b =>
+      b.addEventListener("click", async () => {
+        if (!confirm("¿Seguro que no queréis jugar la repesca? Vuestro rival pasará automáticamente (W.O.) y quedaréis eliminados.")) return;
+        try {
+          await PadelAPI.withdraw(myData.code, parseInt(b.dataset.withdraw, 10));
+          myData = await PadelAPI.myPair(myData.code);
+          myData.code = $("mp-code").value.trim().toUpperCase();
+          renderMyPair();
+          load();
+        } catch (e) { alert(e.message); }
+      })
     );
   }
 

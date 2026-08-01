@@ -33,7 +33,11 @@
       <header class="topbar">
         <div class="brand">
           <div class="ball"></div>
-          <div><h1 id="a-name">Torneo de Pádel</h1><div class="sub">Panel del organizador</div></div>
+          <div>
+            <div class="brand-club">PADEL INDOOR <span>PONFERRADA 3.0</span></div>
+            <h1 id="a-name">Torneo de Pádel</h1>
+            <div class="sub">Panel del organizador · El pádel no duerme</div>
+          </div>
         </div>
         <div>
           <span id="a-status-badge"></span>
@@ -69,9 +73,11 @@
           </div>
           <div class="card">
             <h2>🎲 Sorteo del cuadro</h2>
-            <p class="hint">Cierra la inscripción, sortea el orden de las parejas y genera el cuadro completo de doble eliminación (con byes automáticos si no sale número exacto).</p>
+            <p class="hint">Sortea el orden de las parejas de la categoría elegida y genera su cuadro completo de doble eliminación (con byes automáticos si no sale número exacto).</p>
+            <label>Categoría</label>
+            <select id="draw-cat"></select>
             <button class="btn" id="btn-draw">🎲 Sortear y generar cuadro</button>
-            <button class="btn danger" id="btn-reset">♻️ Reiniciar cuadro</button>
+            <button class="btn danger" id="btn-reset">♻️ Reiniciar este cuadro</button>
             <div class="msg" id="draw-msg"></div>
           </div>
         </div>
@@ -125,6 +131,7 @@
 
       <!-- CUADRO -->
       <section id="tab-cuadro" class="tab-panel hidden">
+        <div id="a-cat-chips" class="cat-chips"></div>
         <div id="a-bracket-area"><p class="hint">Aún no hay cuadro. Genera el sorteo desde la pestaña Control.</p></div>
       </section>
 
@@ -137,8 +144,11 @@
             <input type="text" id="cfg-name" maxlength="80" />
             <label>Club / dirección</label>
             <input type="text" id="cfg-club" maxlength="120" placeholder="Nombre del club y dirección" />
-            <label>Número exacto de parejas (máx. 200)</label>
+            <label>Número exacto de parejas (máx. 200 en total)</label>
             <input type="number" id="cfg-target" min="2" max="200" />
+            <label>Niveles / categorías (separadas por comas)</label>
+            <input type="text" id="cfg-cats" placeholder="Nivel A, Nivel B, Nivel C" />
+            <p class="hint">Cada categoría tiene su propio cuadro de ganadores y perdedores con su campeón. Cambia los nombres solo antes de que haya inscripciones.</p>
             <div class="check"><input type="checkbox" id="cfg-doublefinal" /><span>Final con desempate (si el de perdedores gana la final, se juega otro partido)</span></div>
             <button class="btn" id="btn-save-config">💾 Guardar</button>
             <div class="msg" id="cfg-msg"></div>
@@ -185,6 +195,7 @@
       <label>Jugador/a 1</label><input type="text" id="pm-p1" maxlength="60" />
       <label>Jugador/a 2</label><input type="text" id="pm-p2" maxlength="60" />
       <label>Teléfono</label><input type="tel" id="pm-phone" maxlength="30" />
+      <label>Categoría</label><select id="pm-cat"></select>
       <button class="btn" id="pm-save">💾 Guardar</button>
       <button class="btn secondary" id="pm-close">Cancelar</button>
       <div class="msg" id="pm-msg"></div>

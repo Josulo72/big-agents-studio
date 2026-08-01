@@ -15,8 +15,10 @@
       <div class="brand">
         <div class="ball"></div>
         <div>
+          <div class="brand-club">PADEL INDOOR <span>PONFERRADA 3.0</span></div>
           <h1 id="t-name">Torneo de Pádel</h1>
           <div class="sub" id="t-club"></div>
+          <div class="sub tagline">El pádel no duerme · 12 pistas · 24 h · 365 días</div>
         </div>
       </div>
       <div id="t-status-badge"></div>
@@ -65,6 +67,10 @@
           <input type="text" id="f-p2" maxlength="60" placeholder="Nombre y apellido" />
           <label>Teléfono de contacto (opcional)</label>
           <input type="tel" id="f-phone" maxlength="30" placeholder="600 000 000" />
+          <div id="f-cat-row" class="hidden">
+            <label>Nivel / categoría</label>
+            <select id="f-cat"></select>
+          </div>
           <button class="btn" id="btn-signup">Inscribir pareja 🎾</button>
           <div class="msg" id="insc-msg"></div>
         </div>
@@ -97,10 +103,11 @@
         <h2>🔒 Cuadro no publicado</h2>
         <p class="hint">El organizador todavía no ha publicado el cuadro. En cuanto lo haga, aquí veréis todos los cruces, días y horas.</p>
       </div>
+      <div id="cat-chips" class="cat-chips"></div>
       <div id="bracket-area"></div>
     </section>
 
-    <footer class="footer">Torneo gestionado con 🎾 — doble eliminación · máximo 200 parejas</footer>
+    <footer class="footer">PADEL INDOOR PONFERRADA 3.0 · El pádel no duerme 🎾 — doble eliminación · máximo 200 parejas</footer>
   </div>
 
   <!-- modal resultado -->

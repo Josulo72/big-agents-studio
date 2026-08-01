@@ -4,6 +4,9 @@
   const esc = PadelBracket.escapeHtml;
   let pass = sessionStorage.getItem("padel_admin_pass") || "";
   let state = null; // {tournament, pairs, matches}
+  let currentCat = null;
+
+  function cats() { return (state && state.tournament.categories) || ["General"]; }
 
   function showMsg(id, text, ok) {
     const el = $(id);
@@ -19,6 +22,7 @@
       t.classList.add("active");
       document.querySelectorAll(".tab-panel").forEach(p => p.classList.add("hidden"));
       $("tab-" + t.dataset.tab).classList.remove("hidden");
+      if (t.dataset.tab === "cuadro") PadelBracket.centerScroll($("a-bracket-area"));
     })
   );
 
@@ -78,6 +82,15 @@
     $("cfg-club").value = t.club;
     $("cfg-target").value = t.target_pairs;
     $("cfg-doublefinal").checked = t.double_final;
+    $("cfg-cats").value = cats().join(", ");
+
+    // sorteo: selector de categoria con su estado
+    const prevDraw = $("draw-cat").value;
+    $("draw-cat").innerHTML = cats().map(c => {
+      const n = state.pairs.filter(p => p.category === c).length;
+      const drawn = state.matches.some(m => m.category === c);
+      return `<option value="${esc(c)}" ${c === prevDraw ? "selected" : ""}>${esc(c)} — ${n} parejas${drawn ? " · cuadro creado" : ""}</option>`;
+    }).join("");
 
     // calendario
     const sc = t.schedule_config || {};
@@ -109,25 +122,33 @@
     } catch (err) { showMsg("ctl-msg", err.message, false); refresh(); }
   });
 
-  // ---------- sorteo ----------
+  // ---------- sorteo (por categoria) ----------
   $("btn-draw").addEventListener("click", async () => {
-    const n = state.pairs.length;
-    if (n < 2) return showMsg("draw-msg", "Hacen falta al menos 2 parejas", false);
-    if (n !== state.tournament.target_pairs &&
-        !confirm(`Hay ${n} parejas inscritas pero el objetivo era ${state.tournament.target_pairs}. ¿Sortear igualmente con ${n}?`)) return;
-    if (!confirm(`Se cerrará la inscripción y se sorteará el cuadro con ${n} parejas. ¿Continuar?`)) return;
+    const cat = $("draw-cat").value;
+    const catPairs = state.pairs.filter(p => p.category === cat);
+    const n = catPairs.length;
+    if (n < 2) return showMsg("draw-msg", `Hacen falta al menos 2 parejas en ${cat}`, false);
+    if (!confirm(`Se sorteará el cuadro de "${cat}" con ${n} parejas. ¿Continuar?`)) return;
     try {
       // barajar (sorteo)
-      const ids = state.pairs.map(p => p.id);
+      const ids = catPairs.map(p => p.id);
       for (let i = ids.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [ids[i], ids[j]] = [ids[j], ids[i]];
       }
       const matches = PadelBracket.generate(ids, state.tournament.double_final);
+      // prefijo por categoria para que los codigos sean unicos entre cuadros
+      const ci = cats().indexOf(cat) + 1;
+      const pref = c => (c ? `${ci}·${c}` : c);
+      for (const m of matches) {
+        m.code = pref(m.code);
+        m.win_next_code = pref(m.win_next_code);
+        m.lose_next_code = pref(m.lose_next_code);
+      }
       const seeds = {};
       ids.forEach((id, i) => (seeds[id] = i + 1));
-      const r = await PadelAPI.adminCreateBracket(pass, seeds, matches);
-      showMsg("draw-msg", `Cuadro creado: ${r.matches} partidos. Ahora programa el calendario y publica el cuadro.`, true);
+      const r = await PadelAPI.adminCreateBracket(pass, seeds, matches, cat);
+      showMsg("draw-msg", `Cuadro de ${cat} creado: ${r.matches} partidos. Programa el calendario y publica el cuadro cuando quieras.`, true);
       refresh();
     } catch (e) {
       showMsg("draw-msg", e.message, false);
@@ -135,11 +156,12 @@
   });
 
   $("btn-reset").addEventListener("click", async () => {
-    if (!confirm("Esto BORRA el cuadro y todos los resultados (las parejas se conservan). ¿Seguro?")) return;
-    if (!confirm("Última confirmación: ¿reiniciar el cuadro?")) return;
+    const cat = $("draw-cat").value;
+    if (!confirm(`Esto BORRA el cuadro y los resultados de "${cat}" (las parejas se conservan). ¿Seguro?`)) return;
+    if (!confirm("Última confirmación: ¿reiniciar este cuadro?")) return;
     try {
-      await PadelAPI.adminResetBracket(pass);
-      showMsg("draw-msg", "Cuadro reiniciado", true);
+      await PadelAPI.adminResetBracket(pass, cat);
+      showMsg("draw-msg", `Cuadro de ${cat} reiniciado`, true);
       refresh();
     } catch (e) { showMsg("draw-msg", e.message, false); }
   });
@@ -147,11 +169,12 @@
   // ---------- parejas ----------
   function renderPairs() {
     $("pairs-hint").textContent = `${state.pairs.length} de ${state.tournament.target_pairs} (máx. 200)`;
-    let html = `<tr><th>#</th><th>Jugadores</th><th>Teléfono</th><th>Código</th><th></th></tr>`;
+    let html = `<tr><th>#</th><th>Jugadores</th><th>Categoría</th><th>Teléfono</th><th>Código</th><th></th></tr>`;
     state.pairs.forEach((p, i) => {
       html += `<tr>
         <td>${p.seed || i + 1}</td>
         <td>${esc(p.player1)} y ${esc(p.player2)}</td>
+        <td>${esc(p.category || "—")}</td>
         <td>${esc(p.phone || "—")}</td>
         <td><code>${p.secret_code}</code></td>
         <td class="row-actions">
@@ -178,6 +201,8 @@
     $("pm-p1").value = editingPair ? editingPair.player1 : "";
     $("pm-p2").value = editingPair ? editingPair.player2 : "";
     $("pm-phone").value = editingPair ? editingPair.phone : "";
+    const cur = editingPair ? editingPair.category : cats()[0];
+    $("pm-cat").innerHTML = cats().map(c => `<option ${c === cur ? "selected" : ""}>${esc(c)}</option>`).join("");
     $("pm-msg").className = "msg";
     $("pair-modal").classList.remove("hidden");
   }
@@ -186,9 +211,9 @@
   $("pm-save").addEventListener("click", async () => {
     try {
       if (editingPair) {
-        await PadelAPI.adminUpdatePair(pass, editingPair.id, $("pm-p1").value, $("pm-p2").value, $("pm-phone").value);
+        await PadelAPI.adminUpdatePair(pass, editingPair.id, $("pm-p1").value, $("pm-p2").value, $("pm-phone").value, $("pm-cat").value);
       } else {
-        await PadelAPI.adminAddPair(pass, $("pm-p1").value, $("pm-p2").value, $("pm-phone").value);
+        await PadelAPI.adminAddPair(pass, $("pm-p1").value, $("pm-p2").value, $("pm-phone").value, $("pm-cat").value);
       }
       $("pair-modal").classList.add("hidden");
       refresh();
@@ -299,13 +324,16 @@
       $("matches-table").innerHTML = `<tr><td class="hint">Aún no hay cuadro. Sortéalo en la pestaña Control.</td></tr>`;
       return;
     }
-    let html = `<tr><th>Partido</th><th>Pareja 1</th><th>Pareja 2</th><th>Estado</th><th>Resultado</th><th>Horario</th></tr>`;
+    const multiCat = cats().length > 1;
+    let html = `<tr><th>Partido</th>${multiCat ? "<th>Categoría</th>" : ""}<th>Pareja 1</th><th>Pareja 2</th><th>Estado</th><th>Resultado</th><th>Horario</th></tr>`;
     const ms = state.matches.filter(m => m.status !== "void")
-      .sort((a, b) => a.stage - b.stage || (a.bracket > b.bracket ? 1 : -1) || a.position - b.position);
+      .sort((a, b) => (a.category < b.category ? -1 : a.category > b.category ? 1 : 0) ||
+        a.stage - b.stage || (a.bracket > b.bracket ? 1 : -1) || a.position - b.position);
     for (const m of ms) {
       const winName = m.winner_id ? pairLabel(m.winner_id) : "";
       html += `<tr data-open-match="${m.id}" style="cursor:pointer">
-        <td><b>${m.code}</b></td>
+        <td><b>${PadelBracket.displayCode(m.code)}</b>${m.bracket === "L" ? ' <span class="hint">repesca</span>' : ""}</td>
+        ${multiCat ? `<td>${esc(m.category)}</td>` : ""}
         <td>${m.pair1_id ? esc(pairLabel(m.pair1_id)) : m.slot1_void ? "<i>bye</i>" : "<i>por decidir</i>"}</td>
         <td>${m.pair2_id ? esc(pairLabel(m.pair2_id)) : m.slot2_void ? "<i>bye</i>" : "<i>por decidir</i>"}</td>
         <td>${STATUS_LABEL[m.status] || m.status}</td>
@@ -323,7 +351,7 @@
     const m = state.matches.find(x => x.id === id);
     if (!m) return;
     modalMatch = m;
-    $("mm-title").textContent = `Partido ${m.code}`;
+    $("mm-title").textContent = `Partido ${PadelBracket.displayCode(m.code)} (${m.category})`;
     $("mm-players").textContent =
       `${m.pair1_id ? pairLabel(m.pair1_id) : "por decidir"}  vs  ${m.pair2_id ? pairLabel(m.pair2_id) : "por decidir"}`;
     const opts = [m.pair1_id, m.pair2_id].filter(Boolean)
@@ -370,10 +398,23 @@
   // ---------- cuadro ----------
   function renderBracket() {
     if (!state.matches.length) {
+      $("a-cat-chips").innerHTML = "";
       $("a-bracket-area").innerHTML = '<p class="hint">Aún no hay cuadro. Genera el sorteo desde la pestaña Control.</p>';
       return;
     }
-    PadelBracket.render($("a-bracket-area"), state.matches, state.pairs, { clickable: true });
+    const withMatches = cats().filter(c => state.matches.some(m => m.category === c));
+    if (!currentCat || !withMatches.includes(currentCat)) currentCat = withMatches[0];
+    $("a-cat-chips").innerHTML = withMatches.length > 1
+      ? withMatches.map(c =>
+          `<button class="cat-chip ${c === currentCat ? "active" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("")
+      : "";
+    document.querySelectorAll("#a-cat-chips [data-cat]").forEach(b =>
+      b.addEventListener("click", () => { currentCat = b.dataset.cat; renderBracket(); }));
+    PadelBracket.render(
+      $("a-bracket-area"),
+      state.matches.filter(m => m.category === currentCat),
+      state.pairs, { clickable: true }
+    );
     document.querySelectorAll("#a-bracket-area .match-card[data-clickable]").forEach(c =>
       c.addEventListener("click", () => openMatchModal(parseInt(c.dataset.match, 10))));
   }
@@ -381,11 +422,13 @@
   // ---------- config ----------
   $("btn-save-config").addEventListener("click", async () => {
     try {
+      const catList = $("cfg-cats").value.split(",").map(s => s.trim()).filter(Boolean);
       await PadelAPI.adminUpdateSettings(pass, {
         name: $("cfg-name").value.trim(),
         club: $("cfg-club").value.trim(),
         target_pairs: parseInt($("cfg-target").value, 10) || 16,
-        double_final: $("cfg-doublefinal").checked
+        double_final: $("cfg-doublefinal").checked,
+        categories: catList.length ? catList : ["General"]
       });
       showMsg("cfg-msg", "Guardado", true);
       refresh();
