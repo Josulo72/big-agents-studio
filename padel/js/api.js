@@ -20,6 +20,52 @@
     return data;
   }
 
+  // Confirmacion y aviso propios (los dialogos nativos de Chrome se pueden
+  // bloquear con "impedir mas cuadros de dialogo" y los botones mueren en silencio)
+  window.padelConfirm = text =>
+    new Promise(resolve => {
+      const back = document.createElement("div");
+      back.className = "modal-back";
+      const modal = document.createElement("div");
+      modal.className = "modal";
+      const h = document.createElement("h3");
+      h.textContent = "🤔 ¿Confirmas?";
+      const p = document.createElement("p");
+      p.textContent = text;
+      p.style.whiteSpace = "pre-line";
+      p.style.margin = "0.6rem 0";
+      const yes = document.createElement("button");
+      yes.className = "btn";
+      yes.textContent = "Sí, adelante";
+      const no = document.createElement("button");
+      no.className = "btn secondary";
+      no.textContent = "Cancelar";
+      no.style.marginLeft = "0.5rem";
+      modal.append(h, p, yes, no);
+      back.appendChild(modal);
+      document.body.appendChild(back);
+      yes.onclick = () => { back.remove(); resolve(true); };
+      no.onclick = () => { back.remove(); resolve(false); };
+    });
+
+  window.padelAlert = text =>
+    new Promise(resolve => {
+      const back = document.createElement("div");
+      back.className = "modal-back";
+      const modal = document.createElement("div");
+      modal.className = "modal";
+      const p = document.createElement("p");
+      p.textContent = text;
+      p.style.whiteSpace = "pre-line";
+      const ok = document.createElement("button");
+      ok.className = "btn";
+      ok.textContent = "Entendido";
+      modal.append(p, ok);
+      back.appendChild(modal);
+      document.body.appendChild(back);
+      ok.onclick = () => { back.remove(); resolve(); };
+    });
+
   window.PadelAPI = {
     rpc,
     getState: () => rpc("padel_get_state"),
@@ -43,6 +89,7 @@
       rpc("padel_admin_create_bracket", { p_pass: pass, p_seeds: seeds, p_matches: matches, p_category: category }),
     adminResetBracket: (pass, category) =>
       rpc("padel_admin_reset_bracket", { p_pass: pass, p_category: category || null }),
+    adminFullReset: pass => rpc("padel_admin_full_reset", { p_pass: pass }),
     adminSetResult: (pass, matchId, winnerId, score) =>
       rpc("padel_admin_set_result", { p_pass: pass, p_match: matchId, p_winner: winnerId, p_score: score }),
     adminSchedule: (pass, items) => rpc("padel_admin_schedule", { p_pass: pass, p_items: items })

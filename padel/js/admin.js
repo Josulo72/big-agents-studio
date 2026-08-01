@@ -103,7 +103,7 @@
     $("cfg-start").value = sc.start || "09:00";
     $("cfg-end").value = sc.end || "21:00";
     $("cfg-minutes").value = sc.match_minutes || 60;
-    $("cfg-courts").value = (sc.courts || ["Pista 1"]).join(", ");
+    renderCourts(sc.courts || ["Pista 1"]);
 
     renderPairs();
     renderMatches();
@@ -153,7 +153,7 @@
     const cat = $("draw-cat").value;
     const n = state.pairs.filter(p => p.category === cat).length;
     if (n < 2) return showMsg("draw-msg", `Hacen falta al menos 2 parejas en ${cat}`, false);
-    if (!confirm(`Se sorteará el cuadro de "${cat}" con ${n} parejas. ¿Continuar?`)) return;
+    if (!(await padelConfirm(`Se sorteará el cuadro de "${cat}" con ${n} parejas. ¿Continuar?`))) return;
     try {
       const r = await drawCategory(cat);
       showMsg("draw-msg", `Cuadro de ${cat} creado: ${r.matches} partidos. Programa el calendario y publica el cuadro cuando quieras.`, true);
@@ -165,8 +165,7 @@
 
   $("btn-reset").addEventListener("click", async () => {
     const cat = $("draw-cat").value;
-    if (!confirm(`Esto BORRA el cuadro y los resultados de "${cat}" (las parejas se conservan). ¿Seguro?`)) return;
-    if (!confirm("Última confirmación: ¿reiniciar este cuadro?")) return;
+    if (!(await padelConfirm(`Esto BORRA el cuadro y todos los resultados de "${cat}". Las parejas se conservan. No se puede deshacer.`))) return;
     try {
       await PadelAPI.adminResetBracket(pass, cat);
       showMsg("draw-msg", `Cuadro de ${cat} reiniciado`, true);
@@ -196,9 +195,9 @@
     document.querySelectorAll("[data-del-pair]").forEach(b =>
       b.addEventListener("click", async () => {
         const p = state.pairs.find(x => x.id === parseInt(b.dataset.delPair, 10));
-        if (!confirm(`¿Borrar a ${p.player1} y ${p.player2}?`)) return;
-        try { await PadelAPI.adminDeletePair(pass, p.id); refresh(); }
-        catch (e) { alert(e.message); }
+        if (!(await padelConfirm(`¿Borrar a ${p.player1} y ${p.player2}?`))) return;
+        try { await PadelAPI.adminDeletePair(pass, p.id); refresh(true); }
+        catch (e) { padelAlert(e.message); }
       }));
   }
 
@@ -247,13 +246,33 @@
     const d = $("new-day").value;
     if (d && !days.includes(d)) { days.push(d); renderDays(days); }
   });
+
+  let courts = [];
+  function renderCourts(list) {
+    courts = list.slice();
+    $("courts-list").innerHTML = courts.length
+      ? courts.map(c => `<span class="badge" style="margin:0 0.3rem 0.3rem 0">🎾 ${esc(c)}
+          <a href="#" data-del-court="${esc(c)}" style="color:inherit;text-decoration:none"> ✕</a></span>`).join("")
+      : '<span class="hint">Sin pistas todavía</span>';
+    document.querySelectorAll("[data-del-court]").forEach(a =>
+      a.addEventListener("click", e => {
+        e.preventDefault();
+        courts = courts.filter(c => c !== a.dataset.delCourt);
+        renderCourts(courts);
+      }));
+  }
+  $("btn-add-court").addEventListener("click", () => {
+    const c = $("new-court").value.trim();
+    if (c && !courts.includes(c)) { courts.push(c); renderCourts(courts); $("new-court").value = ""; }
+  });
+
   $("btn-save-schedule").addEventListener("click", async () => {
     const cfg = {
       days,
       start: $("cfg-start").value || "09:00",
       end: $("cfg-end").value || "21:00",
       match_minutes: parseInt($("cfg-minutes").value, 10) || 60,
-      courts: $("cfg-courts").value.split(",").map(s => s.trim()).filter(Boolean)
+      courts: courts.slice()
     };
     if (!cfg.courts.length) cfg.courts = ["Pista 1"];
     try {
@@ -336,7 +355,7 @@
     const resumen = pendientes.length
       ? `• Sortear ${pendientes.length} cuadro(s): ${pendientes.join(", ")}\n`
       : "";
-    if (!confirm(`PILOTO AUTOMÁTICO 🚀\n${resumen}• Programar día, hora y pista de todos los partidos\n• Cerrar la inscripción\n• Publicar el cuadro para los participantes\n\n¿Arrancamos el torneo?`)) return;
+    if (!(await padelConfirm(`PILOTO AUTOMÁTICO 🚀\n${resumen}• Programar día, hora y pista de todos los partidos\n• Cerrar la inscripción\n• Publicar el cuadro para los participantes\n\n¿Arrancamos el torneo?`))) return;
     try {
       for (const c of pendientes) {
         showMsg("pilot-msg", `Sorteando ${c}…`, true);
@@ -478,6 +497,16 @@
       refresh();
     } catch (e) { showMsg("cfg-msg", e.message, false); }
   });
+  $("btn-full-reset").addEventListener("click", async () => {
+    if (!(await padelConfirm("🧨 RESTABLECER TODO EL TORNEO\n\nSe borrarán TODAS las parejas, TODOS los cuadros y TODOS los resultados de todas las categorías.\nSe conservan nombre, club, categorías, pistas y contraseña.\n\nEsto NO se puede deshacer.")))
+      return;
+    try {
+      await PadelAPI.adminFullReset(pass);
+      showMsg("reset-msg", "Torneo restablecido a cero: sin parejas, sin cuadros, inscripción abierta.", true);
+      refresh(true);
+    } catch (e) { showMsg("reset-msg", e.message, false); }
+  });
+
   $("btn-change-pass").addEventListener("click", async () => {
     const np = $("cfg-newpass").value;
     try {

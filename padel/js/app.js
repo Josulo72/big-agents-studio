@@ -220,14 +220,14 @@
     );
     document.querySelectorAll("[data-withdraw]").forEach(b =>
       b.addEventListener("click", async () => {
-        if (!confirm("¿Seguro que no queréis jugar la repesca? Vuestro rival pasará automáticamente (W.O.) y quedaréis eliminados.")) return;
+        if (!(await padelConfirm("¿Seguro que no queréis jugar la repesca? Vuestro rival pasará automáticamente (W.O.) y quedaréis eliminados."))) return;
         try {
           await PadelAPI.withdraw(myData.code, parseInt(b.dataset.withdraw, 10));
           myData = await PadelAPI.myPair(myData.code);
           myData.code = $("mp-code").value.trim().toUpperCase();
           renderMyPair();
           load();
-        } catch (e) { alert(e.message); }
+        } catch (e) { padelAlert(e.message); }
       })
     );
   }
