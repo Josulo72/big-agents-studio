@@ -49,8 +49,13 @@
   }
 
   // ---------- refresco ----------
-  async function refresh() {
-    state = await PadelAPI.adminState(pass);
+  let lastJson = "";
+  async function refresh(force) {
+    const fresh = await PadelAPI.adminState(pass);
+    const j = JSON.stringify(fresh);
+    if (!force && j === lastJson) return; // sin cambios: no repintar (no machacar formularios)
+    lastJson = j;
+    state = fresh;
     const t = state.tournament;
     $("a-name").textContent = t.name;
 
@@ -123,33 +128,36 @@
   });
 
   // ---------- sorteo (por categoria) ----------
+  async function drawCategory(cat) {
+    const catPairs = state.pairs.filter(p => p.category === cat);
+    const ids = catPairs.map(p => p.id);
+    for (let i = ids.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    const matches = PadelBracket.generate(ids, state.tournament.double_final);
+    // prefijo por categoria para que los codigos sean unicos entre cuadros
+    const ci = cats().indexOf(cat) + 1;
+    const pref = c => (c ? `${ci}·${c}` : c);
+    for (const m of matches) {
+      m.code = pref(m.code);
+      m.win_next_code = pref(m.win_next_code);
+      m.lose_next_code = pref(m.lose_next_code);
+    }
+    const seeds = {};
+    ids.forEach((id, i) => (seeds[id] = i + 1));
+    return PadelAPI.adminCreateBracket(pass, seeds, matches, cat);
+  }
+
   $("btn-draw").addEventListener("click", async () => {
     const cat = $("draw-cat").value;
-    const catPairs = state.pairs.filter(p => p.category === cat);
-    const n = catPairs.length;
+    const n = state.pairs.filter(p => p.category === cat).length;
     if (n < 2) return showMsg("draw-msg", `Hacen falta al menos 2 parejas en ${cat}`, false);
     if (!confirm(`Se sorteará el cuadro de "${cat}" con ${n} parejas. ¿Continuar?`)) return;
     try {
-      // barajar (sorteo)
-      const ids = catPairs.map(p => p.id);
-      for (let i = ids.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [ids[i], ids[j]] = [ids[j], ids[i]];
-      }
-      const matches = PadelBracket.generate(ids, state.tournament.double_final);
-      // prefijo por categoria para que los codigos sean unicos entre cuadros
-      const ci = cats().indexOf(cat) + 1;
-      const pref = c => (c ? `${ci}·${c}` : c);
-      for (const m of matches) {
-        m.code = pref(m.code);
-        m.win_next_code = pref(m.win_next_code);
-        m.lose_next_code = pref(m.lose_next_code);
-      }
-      const seeds = {};
-      ids.forEach((id, i) => (seeds[id] = i + 1));
-      const r = await PadelAPI.adminCreateBracket(pass, seeds, matches, cat);
+      const r = await drawCategory(cat);
       showMsg("draw-msg", `Cuadro de ${cat} creado: ${r.matches} partidos. Programa el calendario y publica el cuadro cuando quieras.`, true);
-      refresh();
+      refresh(true);
     } catch (e) {
       showMsg("draw-msg", e.message, false);
     }
@@ -255,11 +263,11 @@
     } catch (e) { showMsg("cal-msg", e.message, false); }
   });
 
-  // programacion automatica
-  $("btn-autoschedule").addEventListener("click", async () => {
+  // programacion automatica (reutilizable por el boton y el piloto automatico)
+  async function autoScheduleAll() {
     const t = state.tournament, sc = t.schedule_config || {};
-    if (!state.matches.length) return showMsg("auto-msg", "Primero sortea el cuadro", false);
-    if (!(sc.days || []).length) return showMsg("auto-msg", "Añade al menos un día de juego y guarda el calendario", false);
+    if (!state.matches.length) throw new Error("Primero sortea algún cuadro");
+    if (!(sc.days || []).length) throw new Error('Añade al menos un día de juego en "Calendario"');
 
     // generar huecos: dia x hora x pista, en orden
     const slots = [];
@@ -299,15 +307,51 @@
       assigned[m.code] = slot.time;
       items.push({ id: m.id, scheduled_at: slot.time.toISOString(), court: slot.court });
     }
-    if (!items.length) return showMsg("auto-msg", "No hay huecos suficientes: añade más días, horas o pistas", false);
+    if (!items.length) throw new Error("No hay huecos suficientes: añade más días, horas o pistas");
+    await PadelAPI.adminSchedule(pass, items);
+    return { count: items.length, failed };
+  }
+
+  $("btn-autoschedule").addEventListener("click", async () => {
     try {
-      await PadelAPI.adminSchedule(pass, items);
+      const r = await autoScheduleAll();
       showMsg("auto-msg",
-        failed
-          ? `Programados ${items.length} partidos. ⚠️ Faltan huecos para ${failed}: añade más días/horas/pistas y repite.`
-          : `Programados ${items.length} partidos ✔`, !failed);
-      refresh();
+        r.failed
+          ? `Programados ${r.count} partidos. ⚠️ Faltan huecos para ${r.failed}: añade más días/horas/pistas y repite.`
+          : `Programados ${r.count} partidos ✔`, !r.failed);
+      refresh(true);
     } catch (e) { showMsg("auto-msg", e.message, false); }
+  });
+
+  // ---------- piloto automatico: todo el torneo en un clic ----------
+  $("btn-autopilot").addEventListener("click", async () => {
+    const sc = state.tournament.schedule_config || {};
+    const pendientes = cats().filter(c =>
+      state.pairs.filter(p => p.category === c).length >= 2 &&
+      !state.matches.some(m => m.category === c));
+    if (!pendientes.length && !state.matches.length)
+      return showMsg("pilot-msg", "Aún no hay categorías con al menos 2 parejas inscritas", false);
+    if (!(sc.days || []).length)
+      return showMsg("pilot-msg", 'Falta el calendario: añade los días de juego en la pestaña "Calendario"', false);
+    const resumen = pendientes.length
+      ? `• Sortear ${pendientes.length} cuadro(s): ${pendientes.join(", ")}\n`
+      : "";
+    if (!confirm(`PILOTO AUTOMÁTICO 🚀\n${resumen}• Programar día, hora y pista de todos los partidos\n• Cerrar la inscripción\n• Publicar el cuadro para los participantes\n\n¿Arrancamos el torneo?`)) return;
+    try {
+      for (const c of pendientes) {
+        showMsg("pilot-msg", `Sorteando ${c}…`, true);
+        await drawCategory(c);
+        await refresh(true);
+      }
+      showMsg("pilot-msg", "Programando partidos…", true);
+      const r = await autoScheduleAll();
+      await PadelAPI.adminUpdateSettings(pass, { registration_open: false, bracket_visible: true });
+      await refresh(true);
+      showMsg("pilot-msg",
+        `🚀 Torneo en marcha: ${pendientes.length} cuadro(s) sorteado(s), ${r.count} partidos programados` +
+        `${r.failed ? ` (⚠️ faltan huecos para ${r.failed}: amplía el calendario)` : ""} y cuadro publicado. ` +
+        `A partir de aquí todo avanza solo con los resultados de las parejas.`, !r.failed);
+    } catch (e) { showMsg("pilot-msg", e.message, false); }
   });
 
   // ---------- partidos ----------
@@ -455,11 +499,17 @@
       })
       .catch(() => sessionStorage.removeItem("padel_admin_pass"));
   }
+  // refresco de fondo: NUNCA mientras se esta editando algo
   setInterval(() => {
+    const activeTab = document.querySelector(".tab.active");
+    const editingTab = activeTab && ["calendario", "config"].includes(activeTab.dataset.tab);
+    const typing = document.activeElement &&
+      ["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement.tagName);
     if (!$("panel-view").classList.contains("hidden") &&
         $("match-modal").classList.contains("hidden") &&
-        $("pair-modal").classList.contains("hidden")) {
-      refresh().catch(() => {});
+        $("pair-modal").classList.contains("hidden") &&
+        !editingTab && !typing) {
+      refresh(false).catch(() => {});
     }
   }, 45000);
 })();

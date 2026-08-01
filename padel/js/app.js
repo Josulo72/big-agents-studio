@@ -24,9 +24,14 @@
   }
 
   // ---------- carga de estado ----------
+  let lastJson = "";
   async function load() {
     try {
-      state = await PadelAPI.getState();
+      const fresh = await PadelAPI.getState();
+      const j = JSON.stringify(fresh);
+      if (j === lastJson) return; // sin cambios: no repintar
+      lastJson = j;
+      state = fresh;
     } catch (e) {
       $("home-text").textContent = "No se puede conectar con el torneo: " + e.message;
       return;

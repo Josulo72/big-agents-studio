@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin · Torneo de Pádel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Barlow+Condensed:ital,wght@0,600;0,700;1,800;1,900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/padel.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%232e6bff'/></svg>" />
 </head>
@@ -63,6 +63,12 @@
 
       <!-- CONTROL -->
       <section id="tab-control" class="tab-panel">
+        <div class="card" style="border-color:rgba(242,100,48,0.55);background:linear-gradient(150deg,rgba(242,100,48,0.1),rgba(12,77,162,0.12))">
+          <h2>🚀 Piloto automático <span class="hint">el torneo entero en un clic</span></h2>
+          <p class="hint">Sortea todos los cuadros pendientes (categorías con 2 o más parejas), asigna día, hora y pista a todos los partidos, cierra la inscripción y publica el cuadro. Solo necesitas tener los días de juego en la pestaña Calendario. Después, los resultados que metan las parejas mueven el torneo solo.</p>
+          <button class="btn" id="btn-autopilot">🚀 Arrancar torneo completo</button>
+          <div class="msg" id="pilot-msg"></div>
+        </div>
         <div class="grid2">
           <div class="card">
             <h2>🚦 Estado del torneo</h2>

@@ -17,6 +17,9 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
+.display, h1, h2, h3, .stat .num, .btn, .tab, .round-label, .badge, .cat-chip, .brand-club {
+  font-family: "Barlow Condensed", "Outfit", sans-serif;
+}
 
 body {
   font-family: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -47,11 +50,26 @@ body::before {
 /* ---------- cabecera ---------- */
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 1rem; flex-wrap: wrap; padding: 0.8rem 0 1.4rem;
+  gap: 1rem; flex-wrap: wrap;
+  margin-bottom: 1.4rem; padding: 1.4rem 1.6rem;
+  border-radius: var(--radius); position: relative; overflow: hidden;
+  background:
+    linear-gradient(78deg, transparent 0 62%, rgba(242,100,48,0.16) 62% 63.5%, transparent 63.5% 66%, rgba(242,100,48,0.9) 66% 78%, rgba(213,88,46,0.95) 78%),
+    radial-gradient(600px 300px at 12% 0%, rgba(46,107,255,0.25), transparent 65%),
+    linear-gradient(160deg, #0d1730, #080e1e);
+  border: 1px solid rgba(120,150,220,0.22);
 }
+.topbar::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 46px 46px;
+}
+.topbar > * { position: relative; z-index: 1; }
 .brand { display: flex; align-items: center; gap: 0.7rem; }
 .brand .ball {
-  width: 42px; height: 42px; border-radius: 50%;
+  width: 54px; height: 54px; border-radius: 50%;
   background: radial-gradient(circle at 32% 30%, #f6ff9e, #dcf25c 55%, #b7d834);
   position: relative; box-shadow: 0 0 24px rgba(220, 242, 92, 0.4);
 }
@@ -60,17 +78,21 @@ body::before {
   border: 2px solid rgba(11, 18, 32, 0.35);
   clip-path: polygon(0 18%, 100% 18%, 100% 30%, 0 30%, 0 70%, 100% 70%, 100% 82%, 0 82%);
 }
-.brand h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.02em; }
+.brand h1 {
+  font-size: 2.1rem; font-weight: 900; font-style: italic;
+  text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.05;
+}
 .brand .sub { color: var(--muted); font-size: 0.85rem; }
 .brand-club {
-  font-size: 0.72rem; font-weight: 900; letter-spacing: 0.24em; color: #ff8f63;
+  font-size: 0.95rem; font-weight: 700; letter-spacing: 0.3em; color: #ff8f63;
+  text-transform: uppercase;
 }
 .brand-club span { color: var(--blue-soft); }
 .brand .tagline { color: #ff8f63; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; }
 
 .badge {
-  display: inline-block; padding: 0.25rem 0.7rem; border-radius: 999px;
-  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.03em;
+  display: inline-block; padding: 0.25rem 0.8rem; border-radius: 999px;
+  font-size: 0.88rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
   background: rgba(46, 107, 255, 0.18); color: var(--blue-soft);
   border: 1px solid rgba(46, 107, 255, 0.4);
 }
@@ -81,9 +103,10 @@ body::before {
 /* ---------- pestañas ---------- */
 .tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.4rem; }
 .tab {
-  padding: 0.55rem 1.1rem; border-radius: 999px; cursor: pointer;
+  padding: 0.5rem 1.3rem; border-radius: 10px; cursor: pointer;
   background: var(--card); border: 1px solid var(--card-border);
-  color: var(--muted); font-weight: 600; font-size: 0.92rem; transition: all 0.18s;
+  color: var(--muted); font-weight: 700; font-size: 1.02rem; transition: all 0.18s;
+  text-transform: uppercase; letter-spacing: 0.08em;
 }
 .tab:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
 .tab.active { background: linear-gradient(160deg, #f26430, #d5582e); color: #fff; border-color: #f26430; }
@@ -94,16 +117,25 @@ body::before {
   border-radius: var(--radius); padding: 1.4rem; margin-bottom: 1.2rem;
   backdrop-filter: blur(8px);
 }
-.card h2 { font-size: 1.15rem; margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.5rem; }
+.card h2 {
+  font-size: 1.3rem; margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.5rem;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;
+}
+.card h2 .hint { text-transform: none; letter-spacing: 0; }
 .card h2 .hint, .hint { color: var(--muted); font-size: 0.85rem; font-weight: 400; }
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
 .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; margin-bottom: 1.2rem; }
 .stat {
-  background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius);
-  padding: 0.9rem 1.1rem;
+  background: linear-gradient(165deg, #131e38, #0d1528);
+  border: 1px solid var(--card-border); border-left: 4px solid #f26430;
+  border-radius: 12px; padding: 0.8rem 1.1rem;
 }
-.stat .num { font-size: 1.7rem; font-weight: 700; color: var(--lime); }
-.stat .lbl { color: var(--muted); font-size: 0.8rem; }
+.stat .num {
+  font-size: 2.3rem; font-weight: 900; font-style: italic; line-height: 1;
+  background: linear-gradient(90deg, #ff8f63, #f26430);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.stat .lbl { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
 
 /* ---------- formularios ---------- */
 label { display: block; font-size: 0.85rem; color: var(--muted); margin: 0.7rem 0 0.25rem; font-weight: 600; }
@@ -121,8 +153,9 @@ input:focus, select:focus { border-color: #f26430; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
-  padding: 0.7rem 1.4rem; border-radius: 12px; border: none; cursor: pointer;
-  font-family: inherit; font-weight: 700; font-size: 0.95rem; transition: all 0.18s;
+  padding: 0.65rem 1.5rem; border-radius: 10px; border: none; cursor: pointer;
+  font-weight: 700; font-size: 1.05rem; transition: all 0.18s;
+  text-transform: uppercase; letter-spacing: 0.07em;
   background: linear-gradient(160deg, #f26430, #d5582e); color: #fff; margin-top: 0.9rem;
 }
 .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(242, 100, 48, 0.4); }
@@ -151,7 +184,11 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 
 /* ---------- cuadro estilo poster: final al centro con trofeo ---------- */
 .bracket-section { margin-bottom: 1.8rem; }
-.bracket-title { font-size: 1.05rem; margin-bottom: 0.7rem; }
+.bracket-title {
+  font-size: 1.35rem; margin-bottom: 0.7rem; text-transform: uppercase;
+  letter-spacing: 0.06em; font-weight: 700; font-style: italic;
+}
+.bracket-title .hint { text-transform: none; letter-spacing: 0; font-style: normal; }
 .bracket-scroll {
   overflow: auto; padding-bottom: 0.6rem; max-height: 80vh;
   border: 1px solid rgba(46,107,255,0.25); border-radius: var(--radius);
@@ -275,7 +312,10 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 .hidden { display: none !important; }
 .right { text-align: right; }
 .row-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-.footer { text-align: center; color: var(--muted); font-size: 0.78rem; padding: 2rem 0 1rem; }
+.footer {
+  text-align: center; color: var(--muted); font-size: 0.85rem; padding: 2.2rem 0 1.2rem;
+  text-transform: uppercase; letter-spacing: 0.18em; font-family: "Barlow Condensed", sans-serif;
+}
 
 .modal-back {
   position: fixed; inset: 0; background: rgba(4, 8, 16, 0.75); z-index: 50;
