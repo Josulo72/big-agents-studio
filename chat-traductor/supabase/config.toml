@@ -1,0 +1,7 @@
+project_id = "chat-traductor"
+
+[functions.translate-message]
+# La función valida el JWT por su cuenta (y además comprueba pertenencia a la
+# sala), pero se deja la verificación de la plataforma activada como primera
+# barrera.
+verify_jwt = true

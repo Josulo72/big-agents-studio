@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --ink: #0f1620;
+    --surface: #18232f;
+    --line: #2b3948;
+    --lang-es: #e0a040;
+    --lang-bg: #48ada4;
+    --text: #e9eef3;
+    --muted: #8496a6;
+
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--ink);
+    color: var(--text);
+    font-family: 'Golos Text', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior-y: none;
+  }
+
+  /* Foco de teclado siempre visible, nunca suprimido. */
+  :focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--line);
+  }
+
+  input,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* iOS hace zoom si el input baja de 16px. */
+  textarea,
+  input {
+    font-size: 16px;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply rounded-control border border-line bg-surface px-3 py-2 text-sm
+           transition-colors duration-120 hover:border-muted
+           disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .field {
+    @apply w-full rounded-control border border-line bg-surface px-3 py-2
+           text-text placeholder:text-muted focus:border-muted focus:outline-none;
+  }
+
+  /* Mono para metadatos, pero sin versalitas: en cirílico las mayúsculas
+     cuestan de leer y el nombre de una persona no se grita. */
+  .meta {
+    @apply font-mono text-[11px] tracking-wide text-muted;
+  }
+
+  /* Eco: transición de altura sin medir nada, con grid 0fr → 1fr. */
+  .echo-grid {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 180ms ease;
+  }
+
+  .echo-grid[data-open='true'] {
+    grid-template-rows: 1fr;
+  }
+
+  .echo-inner {
+    overflow: hidden;
+    min-height: 0;
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-top {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+  }
+}
+
+/* Sin animación para quien la ha desactivado en el sistema. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
