@@ -3,6 +3,7 @@ import { MessageBubble } from './MessageBubble'
 import type { Strings } from '../lib/i18n'
 import { localeOf } from '../lib/i18n'
 import type { ChatMessage, Lang } from '../lib/types'
+import type { ReactionMap } from '../hooks/useReactions'
 
 interface Props {
   messages: ChatMessage[]
@@ -15,6 +16,8 @@ interface Props {
   loadingOlder: boolean
   onLoadOlder: () => void
   onRetry: (message: ChatMessage) => void
+  reactions: ReactionMap
+  onReact: (messageId: string, emoji: string) => void
 }
 
 const NEAR_BOTTOM_PX = 120
@@ -30,6 +33,8 @@ export function MessageList({
   loadingOlder,
   onLoadOlder,
   onRetry,
+  reactions,
+  onReact,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -141,6 +146,9 @@ export function MessageList({
                   strings={strings}
                   now={now}
                   onRetry={onRetry}
+                  reactions={reactions.get(message.id) ?? []}
+                  myProfileId={viewerId}
+                  onReact={(emoji) => onReact(message.id, emoji)}
                 />
               </Fragment>
             )

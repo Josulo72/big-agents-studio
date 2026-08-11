@@ -10,6 +10,7 @@ import { useMessages } from '../hooks/useMessages'
 import { useTyping } from '../hooks/useTyping'
 import { useOnline, useTicker } from '../hooks/useOnline'
 import { usePush } from '../hooks/usePush'
+import { useReactions } from '../hooks/useReactions'
 import { t } from '../lib/i18n'
 import type { Profile, Room } from '../lib/types'
 
@@ -43,6 +44,7 @@ export function ChatRoom({ profile, room, members, onProfileChanged }: Props) {
 
   const { typingName, notifyTyping, notifyStopped } = useTyping(room.id, profile)
   const push = usePush(profile)
+  const { reactions, toggle: toggleReaction } = useReactions(room.id, profile)
   const [menuOpen, setMenuOpen] = useState(false)
 
   const hasPending = messages.some((message) => message.status === 'pending')
@@ -99,6 +101,8 @@ export function ChatRoom({ profile, room, members, onProfileChanged }: Props) {
           loadingOlder={loadingOlder}
           onLoadOlder={loadOlder}
           onRetry={retry}
+          reactions={reactions}
+          onReact={(messageId, emoji) => void toggleReaction(messageId, emoji)}
         />
 
         <TypingIndicator name={typingName} strings={strings} />

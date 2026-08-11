@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   displayText,
   needsTranslation,
@@ -6,6 +6,8 @@ import {
   type Lang,
 } from '../lib/types'
 import { Attachment } from './Attachment'
+import { Reactions, ReactionPicker } from './Reactions'
+import type { Reaction } from '../hooks/useReactions'
 import { langLabel, localeOf, type Strings } from '../lib/i18n'
 
 /** Un mensaje pendiente más de esto se considera atascado y ofrece reintento. */
@@ -18,6 +20,9 @@ interface Props {
   strings: Strings
   now: number
   onRetry: (message: ChatMessage) => void
+  reactions: Reaction[]
+  myProfileId: string
+  onReact: (emoji: string) => void
 }
 
 export function MessageBubble({
@@ -27,8 +32,36 @@ export function MessageBubble({
   strings,
   now,
   onRetry,
+  reactions,
+  myProfileId,
+  onReact,
 }: Props) {
   const [openEcho, setOpenEcho] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
+
+  // Pulsación larga para reaccionar. Se cancela si el dedo se mueve, para no
+  // dispararla mientras se desplaza la conversación.
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const movido = useRef(false)
+  const largaDisparada = useRef(false)
+
+  const cancelarPulsacion = () => {
+    if (pressTimer.current) clearTimeout(pressTimer.current)
+    pressTimer.current = null
+  }
+
+  const alPulsar = () => {
+    movido.current = false
+    largaDisparada.current = false
+    cancelarPulsacion()
+    pressTimer.current = setTimeout(() => {
+      if (movido.current) return
+      largaDisparada.current = true
+      setPickerOpen(true)
+      // Un toque háptico si el dispositivo lo tiene.
+      navigator.vibrate?.(12)
+    }, 420)
+  }
 
   const { text, isTranslation } = displayText(message, viewerLang, isOwn)
   const tieneAdjunto =
@@ -59,8 +92,28 @@ export function MessageBubble({
           : null
 
   const toggleEcho = () => {
+    // Si venimos de una pulsación larga, el toque no debe abrir también el eco.
+    if (largaDisparada.current) {
+      largaDisparada.current = false
+      return
+    }
     if (!isTranslation) return
     setOpenEcho((open) => !open)
+  }
+
+  const gestos = {
+    onPointerDown: alPulsar,
+    onPointerMove: () => {
+      movido.current = true
+      cancelarPulsacion()
+    },
+    onPointerUp: cancelarPulsacion,
+    onPointerLeave: cancelarPulsacion,
+    onContextMenu: (event: React.MouseEvent) => {
+      // En escritorio, el clic derecho abre el mismo selector.
+      event.preventDefault()
+      setPickerOpen(true)
+    },
   }
 
   return (
@@ -70,8 +123,20 @@ export function MessageBubble({
         isOwn ? 'justify-end pl-8' : 'justify-start pr-8',
       ].join(' ')}
     >
-      <div className="flex max-w-[80%] flex-col gap-1 sm:max-w-[68%]">
-        <div className={`bubble ${isOwn ? 'bubble-me' : 'bubble-you'}`}>
+      <div className="relative flex max-w-[80%] flex-col gap-1 sm:max-w-[68%]">
+        {pickerOpen && (
+          <ReactionPicker
+            isOwn={isOwn}
+            current={reactions.find((r) => r.profile_id === myProfileId)?.emoji}
+            onPick={onReact}
+            onClose={() => setPickerOpen(false)}
+          />
+        )}
+
+        <div
+          {...gestos}
+          className={`bubble select-none ${isOwn ? 'bubble-me' : 'bubble-you'}`}
+        >
           {isTranslation ? (
             <button
               type="button"
@@ -106,6 +171,13 @@ export function MessageBubble({
             />
           )}
         </div>
+
+        <Reactions
+          reactions={reactions}
+          myProfileId={myProfileId}
+          isOwn={isOwn}
+          onToggle={onReact}
+        />
 
         {/* Bajo la burbuja solo aparece lo excepcional: idioma de origen cuando
             hay traducción que desplegar, y los estados que piden acción. */}

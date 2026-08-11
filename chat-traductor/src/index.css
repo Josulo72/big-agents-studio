@@ -94,6 +94,10 @@
   /* --- Burbujas -------------------------------------------------------- */
   .bubble {
     position: relative;
+    /* Sin esto, mantener pulsado en iOS abre el menú de selección del sistema
+       en lugar de las reacciones. El texto se sigue pudiendo copiar desde el
+       menú contextual del escritorio. */
+    -webkit-touch-callout: none;
     padding: 10px 14px;
     max-width: 100%;
     box-shadow:
