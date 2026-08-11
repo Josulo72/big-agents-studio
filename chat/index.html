@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5"
+    />
+    <title>Chat</title>
+    <meta name="description" content="Chat con traducción automática ES ↔ BG" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/big-agents-studio/chat/manifest.webmanifest" />
+    <meta name="theme-color" content="#0F1620" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Chat" />
+    <link rel="apple-touch-icon" href="/big-agents-studio/chat/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/big-agents-studio/chat/icons/icon-192.png" />
+
+    <!--
+      Fuentes auto-alojadas (`npm run fonts`), no enlazadas a Google.
+      Las tres familias traen el subset cirílico dentro del repositorio: es la
+      única forma de que no ocurra el fallo silencioso del brief — que la fuente
+      cargue, el cirílico caiga al fallback del sistema, y la app se vea
+      descuadrada solo para el participante búlgaro.
+
+      En esta app siempre conviven los dos alfabetos (la traducción en uno, el
+      eco en el otro), así que se precargan los dos subsets del cuerpo.
+    -->
+    <link rel="stylesheet" href="/big-agents-studio/chat/fonts/fonts.css" />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/big-agents-studio/chat/fonts/golos-text-400-latin.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/big-agents-studio/chat/fonts/golos-text-400-cyrillic.woff2"
+      crossorigin
+    />
+    <script type="module" crossorigin src="/big-agents-studio/chat/assets/index-BlCkm6wX.js"></script>
+    <link rel="stylesheet" crossorigin href="/big-agents-studio/chat/assets/index-DsdQIGD1.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
