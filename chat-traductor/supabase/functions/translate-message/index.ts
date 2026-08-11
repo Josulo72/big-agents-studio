@@ -8,7 +8,7 @@
 //   DEEPL_API_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL
 
 import { createClient } from 'jsr:@supabase/supabase-js@2'
-import { corsHeaders, json } from '../_shared/cors.ts'
+import { corsHeaders, json } from './cors.ts'
 
 type Lang = 'es' | 'bg'
 
