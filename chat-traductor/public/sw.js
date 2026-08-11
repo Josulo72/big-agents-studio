@@ -25,6 +25,53 @@ self.addEventListener('activate', (event) => {
   )
 })
 
+// --- Notificaciones --------------------------------------------------------
+
+self.addEventListener('push', (event) => {
+  let data = {}
+  try {
+    data = event.data ? event.data.json() : {}
+  } catch {
+    data = {}
+  }
+
+  const title = data.title || 'Mensaje nuevo'
+  const options = {
+    body: data.body || '',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
+    lang: data.lang || 'es',
+    // Un `tag` por sala hace que los mensajes seguidos se apilen en una sola
+    // notificación en vez de llenar el centro de notificaciones.
+    tag: data.tag || 'chat',
+    renotify: true,
+    data: { url: data.url || '/' },
+  }
+
+  event.waitUntil(self.registration.showNotification(title, options))
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const target = new URL(event.notification.data?.url || '/', self.location.origin).href
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clients) => {
+        // Si la app ya está abierta, se le da el foco en vez de abrir otra.
+        for (const client of clients) {
+          if (client.url.startsWith(self.location.origin) && 'focus' in client) {
+            return client.focus()
+          }
+        }
+        return self.clients.openWindow(target)
+      }),
+  )
+})
+
+// --- Red -------------------------------------------------------------------
+
 self.addEventListener('fetch', (event) => {
   const { request } = event
   if (request.method !== 'GET') return

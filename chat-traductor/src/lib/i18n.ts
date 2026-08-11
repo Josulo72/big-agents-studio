@@ -46,6 +46,14 @@ const strings = {
     today: 'Hoy',
     yesterday: 'Ayer',
     newMessages: 'Mensajes nuevos',
+
+    noFreeSlots: 'No quedan plazas libres en esta sala.',
+    claimHint: 'Se guarda en este dispositivo. No hace falta contraseña ni correo.',
+    notifyOn: 'Avisos activados',
+    notifyOff: 'Activar avisos',
+    notifyDenied: 'Avisos bloqueados en el navegador',
+    notifyInstall: 'Instala la app para recibir avisos',
+    newMessage: 'Mensaje nuevo',
   },
   bg: {
     signInTitle: 'Вход',
@@ -88,6 +96,14 @@ const strings = {
     today: 'Днес',
     yesterday: 'Вчера',
     newMessages: 'Нови съобщения',
+
+    noFreeSlots: 'В тази стая няма свободни места.',
+    claimHint: 'Запазва се на това устройство. Не е нужна парола или имейл.',
+    notifyOn: 'Известията са включени',
+    notifyOff: 'Включи известията',
+    notifyDenied: 'Известията са блокирани в браузъра',
+    notifyInstall: 'Инсталирай приложението, за да получаваш известия',
+    newMessage: 'Ново съобщение',
   },
 } as const
 

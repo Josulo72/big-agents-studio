@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { langLabel, type Strings } from '../lib/i18n'
 import type { Profile } from '../lib/types'
 
@@ -6,10 +7,10 @@ interface Props {
   other: Profile | null
   strings: Strings
   status: 'connected' | 'connecting' | 'offline'
-  onSignOut: () => void
+  notify: ReactNode
 }
 
-export function Header({ title, other, strings, status, onSignOut }: Props) {
+export function Header({ title, other, strings, status, notify }: Props) {
   return (
     <header className="safe-top sticky top-0 z-10 border-b border-line bg-surface px-3 pb-2">
       <div className="flex items-center gap-3">
@@ -36,9 +37,7 @@ export function Header({ title, other, strings, status, onSignOut }: Props) {
           </p>
         </div>
 
-        <button type="button" onClick={onSignOut} className="btn shrink-0 py-1">
-          {strings.signOut}
-        </button>
+        {notify}
       </div>
     </header>
   )

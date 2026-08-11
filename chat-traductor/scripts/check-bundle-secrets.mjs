@@ -22,6 +22,13 @@ const PATTERNS = [
   },
   { label: 'nombre de secret DEEPL_API_KEY', regex: /DEEPL_API_KEY/g },
   { label: 'nombre de secret SERVICE_ROLE', regex: /SERVICE_ROLE_KEY/g },
+  { label: 'nombre de secret VAPID_PRIVATE', regex: /VAPID_PRIVATE/g },
+  // La clave VAPID pública sí debe ir en el bundle; la privada es un JWK con
+  // componente `d`, y eso no puede aparecer nunca.
+  {
+    label: 'clave VAPID privada (JWK con "d")',
+    regex: /"crv"\s*:\s*"P-256"[^}]*"d"\s*:\s*"[A-Za-z0-9_-]{20,}"/g,
+  },
   // Un JWT de Supabase lleva el rol en el payload, codificado en base64url.
   {
     label: 'JWT con rol service_role',

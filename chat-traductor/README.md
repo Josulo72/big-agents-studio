@@ -9,7 +9,7 @@ cualquier mensaje recibido deja desplegar el original debajo de la traducción.
 
 ```
 React 18 + Vite + TypeScript + Tailwind
-Supabase (Postgres + Realtime + Auth)
+Supabase (Postgres + Realtime + Auth anónima)
 DeepL API Free, detrás de una Edge Function en Deno
 ```
 
@@ -19,26 +19,34 @@ DeepL API Free, detrás de una Edge Function en Deno
 
 ### 1. Proyecto de Supabase
 
-Crear el proyecto y, en el SQL Editor, ejecutar en este orden:
+En el SQL Editor, ejecutar en este orden:
 
 1. `supabase/migrations/0001_init.sql` — tablas, RLS, publicación de Realtime.
-2. `supabase/seed.sql` — perfiles, sala y pertenencias. **Editar antes** los dos
-   correos y los dos nombres que hay al principio del bloque.
+2. `supabase/migrations/0002_acceso_sin_login.sql` — plazas reclamables.
+3. `supabase/migrations/0003_push.sql` — suscripciones de notificaciones.
+4. `supabase/seed.sql` — la sala y sus dos plazas. **Editar antes** los dos
+   nombres.
 
-Antes del paso 2 hay que crear las dos cuentas:
+Y en el panel:
 
-- **Authentication → Providers → Email**: desactivar *Enable Sign Ups*. No hay
-  registro público; son dos cuentas y punto.
-- **Authentication → Users → Add user**: una por cada correo, con *Auto Confirm
-  User* activado. No hace falta contraseña, se entra por magic link.
-- **Authentication → URL Configuration**: añadir la URL de producción a
-  *Redirect URLs* (y `http://localhost:5173` para desarrollo).
+- **Authentication → Sign In / Providers → Allow anonymous sign-ins**:
+  activarlo. Sin esto no se puede entrar.
+- **Authentication → Providers → Email**: desactivar *Enable Sign Ups*. No se
+  usa el correo para nada, pero mejor que no exista la puerta.
+
+No hay cuentas que crear.
 
 ### 2. Edge Function
 
 ```bash
 supabase link --project-ref <ref>
 supabase secrets set DEEPL_API_KEY='...'      # la clave Free acaba en :fx
+
+# Notificaciones (opcional; sin esto la app va igual, pero sin avisos)
+supabase secrets set VAPID_PUBLIC_KEY='...'
+supabase secrets set VAPID_PRIVATE_JWK='{"kty":"EC","crv":"P-256",...}'
+supabase secrets set VAPID_SUBJECT='mailto:tu@correo.com'
+
 supabase functions deploy translate-message
 ```
 
@@ -64,6 +72,52 @@ En Vercel o Netlify, con el directorio raíz apuntando a `chat-traductor/`
 `index.html` y las cabeceras de caché.
 
 ---
+
+## Acceso: sin login, pero con identidad
+
+Nadie escribe correo ni contraseña. Al abrir la app, el navegador abre una
+**sesión anónima** de Supabase y lo único que ve el usuario es una pantalla con
+dos nombres: toca el suyo y entra. Solo la primera vez en cada dispositivo.
+
+Esa sesión anónima es lo que hace que siga habiendo un `auth.uid()` real, y por
+tanto que el RLS siga protegiendo algo. Sin identidad en la base de datos, la
+clave anónima que va necesariamente dentro del bundle bastaría para que
+cualquiera leyese la conversación entera por la API REST.
+
+**Las plazas se reparten por orden de llegada.** La primera sesión que reclama
+la plaza española se queda con ella y a partir de ahí está cerrada; `claim_slot`
+serializa con `for update`, así que dos reclamos simultáneos no se pisan.
+Conviene reclamar las dos antes de que la URL circule por ningún sitio. RLS solo
+deja ver las plazas libres, de modo que una vez cogidas las dos, quien llegue de
+fuera no ve ni los nombres.
+
+Si alguien reclama una plaza por error:
+
+```sql
+select public.release_slot('<room_id>', 'es');
+```
+
+## Notificaciones
+
+Web Push estándar, sin servicios de terceros. La propia Edge Function, después
+de traducir, avisa a los demás miembros de la sala — cada uno en **su** idioma,
+igual que en la burbuja: si hay traducción, la traducción; si no, el original.
+Si DeepL falla también se avisa: el mensaje ha llegado igual.
+
+El cifrado (RFC 8291) y la firma VAPID (RFC 8292) están implementados a mano
+con WebCrypto en `webpush.ts`, sin dependencias. Hay una verificación real
+contra `http_ece`, una implementación independiente del mismo RFC:
+
+```bash
+npm run verify:webpush
+```
+
+Comprueba que lo que ciframos lo descifra otro, que la cabecera `aes128gcm` está
+bien formada y que la firma ES256 valida con la clave pública anunciada.
+
+**En iOS los avisos solo existen si la app está instalada en la pantalla de
+inicio.** En Safari normal el `PushManager` ni aparece; no es un fallo. El botón
+de la barra se calla en ese caso en vez de ofrecer algo que no va a funcionar.
 
 ## Cómo funciona
 
@@ -122,7 +176,7 @@ Postgres en cada tecla. `typing_state` queda en el esquema como reserva.
 
 ## Seguridad
 
-- RLS activo en las cinco tablas. Un usuario solo ve las salas de las que es
+- RLS activo en las siete tablas. Un usuario solo ve las salas de las que es
   miembro, y solo puede insertar mensajes con `sender_id = auth.uid()`.
 - **Sin políticas de `update` ni `delete` sobre `messages`**: con RLS activo, la
   ausencia de política las deniega. Las traducciones solo las escribe la Edge
@@ -130,9 +184,12 @@ Postgres en cada tecla. `typing_state` queda en el esquema como reserva.
 - Las políticas que consultan `room_members` lo hacen a través de funciones
   `security definer` (`is_room_member`, `shares_room_with`). Consultar la tabla
   directamente desde su propia política provoca recursión infinita en RLS.
-- `DEEPL_API_KEY` y `SUPABASE_SERVICE_ROLE_KEY` viven solo en los secrets de
-  Supabase. `npm run check:secrets` revisa `dist/` y falla si alguna se ha
-  colado; distingue el JWT anónimo (que sí debe estar) del de `service_role`.
+- `DEEPL_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY` y `VAPID_PRIVATE_JWK` viven solo
+  en los secrets de Supabase. `npm run check:secrets` revisa `dist/` y falla si
+  alguna se ha colado; distingue el JWT anónimo y la clave VAPID pública (que
+  sí deben estar) del `service_role` y de la VAPID privada.
+- `claim_slot` y `release_slot` son `security definer` y solo `claim_slot` está
+  concedida a `authenticated`: liberar una plaza requiere el SQL Editor.
 
 ### Comprobar el aislamiento contra la API REST
 
@@ -206,6 +263,7 @@ npm run icons   # regenera los iconos de la PWA
 | `npm run build` | Typecheck + build de producción |
 | `npm test` | Tests de la lógica de mensajes |
 | `npm run check:secrets` | Busca secretos en `dist/` (tras `build`) |
+| `npm run verify:webpush` | Verifica el cifrado push contra `http_ece` |
 | `npm run fonts` | Descarga y auto-aloja las tres familias |
 | `npm run icons` | Regenera los iconos de la PWA |
 

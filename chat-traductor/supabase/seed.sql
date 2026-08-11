@@ -1,57 +1,46 @@
 -- ---------------------------------------------------------------------------
--- Alta de los dos participantes y de la sala única.
+-- Crea la sala y sus dos plazas. No crea usuarios: no hay cuentas que crear.
 --
--- Antes de ejecutar esto:
---   1. Authentication → Providers → Email: desactivar "Enable Sign Ups".
---   2. Authentication → Users → "Add user" dos veces (Auto Confirm User = on),
---      una por cada correo. No hace falta contraseña: se entra por magic link.
+-- Cada uno abre la app, toca su nombre una vez en su dispositivo y queda
+-- vinculado a esa plaza para siempre. La primera sesión que reclama una plaza
+-- se la queda, así que reclamadlas las dos antes de que la URL circule.
 --
--- Después sustituye los dos correos de abajo y lanza el script entero.
--- Es idempotente.
+-- Requisito previo en el panel:
+--   Authentication → Sign In / Providers → "Allow anonymous sign-ins" activado.
+--
+-- Cambia los dos nombres y ejecuta. Es idempotente.
 -- ---------------------------------------------------------------------------
 
 do $$
 declare
-  v_email_es   text := 'persona-es@example.com';   -- <-- cambiar
-  v_email_bg   text := 'persona-bg@example.com';   -- <-- cambiar
-  v_name_es    text := 'Nombre ES';                -- <-- cambiar
-  v_name_bg    text := 'Име БГ';                   -- <-- cambiar
-  v_room_name  text := 'Casa';
-  v_id_es      uuid;
-  v_id_bg      uuid;
-  v_room       uuid;
+  v_room_name text := 'Casa';
+  v_name_es   text := 'Jose';   -- <-- cambiar
+  v_name_bg   text := 'Ива';    -- <-- cambiar
+  v_room      uuid;
 begin
-  select id into v_id_es from auth.users where lower(email) = lower(v_email_es);
-  select id into v_id_bg from auth.users where lower(email) = lower(v_email_bg);
-
-  if v_id_es is null then
-    raise exception 'No existe el usuario %. Créalo antes en Authentication → Users.', v_email_es;
-  end if;
-  if v_id_bg is null then
-    raise exception 'No existe el usuario %. Créalo antes en Authentication → Users.', v_email_bg;
-  end if;
-
-  insert into public.profiles (id, display_name, lang)
-  values (v_id_es, v_name_es, 'es')
-  on conflict (id) do update set display_name = excluded.display_name,
-                                 lang = excluded.lang;
-
-  insert into public.profiles (id, display_name, lang)
-  values (v_id_bg, v_name_bg, 'bg')
-  on conflict (id) do update set display_name = excluded.display_name,
-                                 lang = excluded.lang;
-
   select id into v_room from public.rooms where name = v_room_name limit 1;
   if v_room is null then
     insert into public.rooms (name) values (v_room_name) returning id into v_room;
   end if;
 
-  insert into public.room_members (room_id, profile_id)
-  values (v_room, v_id_es), (v_room, v_id_bg)
-  on conflict do nothing;
+  insert into public.room_slots (room_id, lang, display_name)
+  values (v_room, 'es', v_name_es),
+         (v_room, 'bg', v_name_bg)
+  on conflict (room_id, lang) do update
+     set display_name = excluded.display_name;
 
   raise notice 'Sala lista. VITE_ROOM_ID (opcional) = %', v_room;
 end $$;
 
--- El id de la sala, para copiarlo al .env si se quiere fijar:
-select id as room_id, name from public.rooms;
+select r.id as room_id,
+       r.name,
+       s.lang,
+       s.display_name,
+       case when s.claimed_by is null then 'libre' else 'ocupada' end as estado
+  from public.rooms r
+  join public.room_slots s on s.room_id = r.id
+ order by r.created_at, s.lang;
+
+-- Para liberar una plaza reclamada por error (borra su perfil y sus mensajes
+-- quedan huérfanos, así que úsalo solo durante la puesta en marcha):
+--   select public.release_slot('<room_id>', 'es');

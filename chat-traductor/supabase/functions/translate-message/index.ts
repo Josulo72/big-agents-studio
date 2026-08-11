@@ -9,8 +9,15 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { corsHeaders, json } from './cors.ts'
+import { sendPush, type PushSubscription, type VapidDetails } from './webpush.ts'
 
 type Lang = 'es' | 'bg'
+
+interface Member {
+  id: string
+  lang: Lang
+  display_name: string
+}
 
 interface MessageRow {
   id: string
@@ -36,6 +43,21 @@ const DEEPL_BASE =
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 })
+
+// Notificaciones: si no hay claves VAPID configuradas, todo el bloque de push
+// simplemente no existe y la traducción sigue funcionando igual.
+const VAPID: VapidDetails | null = (() => {
+  const publicKey = Deno.env.get('VAPID_PUBLIC_KEY')
+  const privateJwk = Deno.env.get('VAPID_PRIVATE_JWK')
+  const subject = Deno.env.get('VAPID_SUBJECT')
+  if (!publicKey || !privateJwk || !subject) return null
+  try {
+    return { publicKey, privateJwk: JSON.parse(privateJwk), subject }
+  } catch {
+    console.error('VAPID_PRIVATE_JWK no es un JSON válido')
+    return null
+  }
+})()
 
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
@@ -95,20 +117,20 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (!membership) return json({ error: 'forbidden' }, 403)
 
   // 3. Idiomas destino: los de los miembros de la sala, menos el de origen --
-  const { data: members, error: membersError } = await admin
+  const { data: memberRows, error: membersError } = await admin
     .from('room_members')
-    .select('profiles!inner(lang)')
+    .select('profiles!inner(id, lang, display_name)')
     .eq('room_id', message.room_id)
 
   if (membersError) {
     return json({ error: 'db_error', detail: membersError.message }, 500)
   }
 
-  const memberLangs = (members ?? [])
-    .map((row) => (row as unknown as { profiles: { lang: Lang } }).profiles?.lang)
+  const members = (memberRows ?? [])
+    .map((row) => (row as unknown as { profiles: Member }).profiles)
     .filter(Boolean)
 
-  const targets = [...new Set(memberLangs)].filter(
+  const targets = [...new Set(members.map((m) => m.lang))].filter(
     (lang) => lang !== message.source_lang,
   )
 
@@ -154,6 +176,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
       })
       .eq('id', message.id)
     console.error('translate-message failed', message.id, detail)
+    // Se avisa igual: el mensaje ha llegado, aunque sea sin traducir.
+    await notifyOthers(message, translations, members)
     return json({ status: 'failed', translations, error: detail }, 200)
   }
 
@@ -167,8 +191,88 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return json({ error: 'db_error', detail: updateError.message }, 500)
   }
 
+  await notifyOthers(message, translations, members)
+
   return json({ status: 'translated', translations })
 })
+
+// ---------------------------------------------------------------------------
+
+const NOTIFICATION_MAX_CHARS = 140
+
+/**
+ * Avisa por push a todos los miembros de la sala menos al que escribió.
+ *
+ * Cada destinatario recibe el texto en SU idioma, igual que en la burbuja: si
+ * la traducción existe, la traducción; si no, el original. Un fallo aquí nunca
+ * tumba la traducción, que es lo importante.
+ */
+async function notifyOthers(
+  message: MessageRow,
+  translations: Record<string, string>,
+  members: Member[],
+): Promise<void> {
+  if (!VAPID) return
+
+  const recipients = members.filter((member) => member.id !== message.sender_id)
+  if (recipients.length === 0) return
+
+  const senderName =
+    members.find((member) => member.id === message.sender_id)?.display_name ?? ''
+
+  try {
+    const { data: subscriptions, error } = await admin
+      .from('push_subscriptions')
+      .select('endpoint, p256dh, auth, profile_id')
+      .in(
+        'profile_id',
+        recipients.map((r) => r.id),
+      )
+
+    if (error) throw error
+    if (!subscriptions || subscriptions.length === 0) return
+
+    const byProfile = new Map(recipients.map((r) => [r.id, r]))
+
+    const results = await Promise.allSettled(
+      subscriptions.map((row) => {
+        const recipient = byProfile.get(row.profile_id as string)!
+        const text = translations[recipient.lang] ?? message.source_text
+        const body =
+          text.length > NOTIFICATION_MAX_CHARS
+            ? `${text.slice(0, NOTIFICATION_MAX_CHARS - 1)}…`
+            : text
+
+        return sendPush(
+          row as unknown as PushSubscription,
+          {
+            title: senderName,
+            body,
+            lang: recipient.lang,
+            tag: `room:${message.room_id}`,
+            url: '/',
+          },
+          VAPID!,
+        )
+      }),
+    )
+
+    // Endpoints que el navegador ya ha tirado: se limpian para no reintentar
+    // contra ellos en cada mensaje.
+    const gone = results
+      .filter(
+        (result): result is PromiseFulfilledResult<{ endpoint: string; gone: boolean }> =>
+          result.status === 'fulfilled' && result.value.gone,
+      )
+      .map((result) => result.value.endpoint)
+
+    if (gone.length > 0) {
+      await admin.from('push_subscriptions').delete().in('endpoint', gone)
+    }
+  } catch (err) {
+    console.error('push', err instanceof Error ? err.message : String(err))
+  }
+}
 
 // ---------------------------------------------------------------------------
 

@@ -3,11 +3,12 @@ import { Header } from './Header'
 import { MessageList } from './MessageList'
 import { Composer } from './Composer'
 import { TypingIndicator } from './TypingIndicator'
+import { NotifyToggle } from './NotifyToggle'
 import { useMessages } from '../hooks/useMessages'
 import { useTyping } from '../hooks/useTyping'
 import { useOnline, useTicker } from '../hooks/useOnline'
+import { usePush } from '../hooks/usePush'
 import { t } from '../lib/i18n'
-import { supabase } from '../lib/supabase'
 import type { Profile, Room } from '../lib/types'
 
 interface Props {
@@ -37,6 +38,7 @@ export function ChatRoom({ profile, room, members }: Props) {
   } = useMessages({ roomId: room.id, profile })
 
   const { typingName, notifyTyping, notifyStopped } = useTyping(room.id, profile)
+  const push = usePush(profile)
 
   const hasPending = messages.some((message) => message.status === 'pending')
   const now = useTicker(hasPending)
@@ -60,7 +62,14 @@ export function ChatRoom({ profile, room, members }: Props) {
         other={other}
         strings={strings}
         status={status}
-        onSignOut={() => void supabase.auth.signOut()}
+        notify={
+          <NotifyToggle
+            state={push.state}
+            strings={strings}
+            onEnable={() => void push.enable()}
+            onDisable={() => void push.disable()}
+          />
+        }
       />
 
       <MessageList
