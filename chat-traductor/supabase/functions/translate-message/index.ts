@@ -4,14 +4,21 @@
 //           { "usage": true }          devuelve el consumo del plan de DeepL
 // Salida:   { "status": "translated" | "failed", "translations": {...} }
 //
-// Secrets necesarios (nunca en el frontend):
-//   DEEPL_API_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL
+// Secrets (nunca en el frontend):
+//   DEEPL_API_KEY *o* GEMINI_API_KEY  — proveedor de traducción, ver translate.ts
+//   VAPID_*                            — notificaciones, opcional
+//   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY — los inyecta la plataforma
 
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { corsHeaders, json } from './cors.ts'
 import { sendPush, type PushSubscription, type VapidDetails } from './webpush.ts'
-
-type Lang = 'es' | 'bg'
+import {
+  activeProvider,
+  translate,
+  usage as providerUsage,
+  type ContextMessage,
+  type Lang,
+} from './translate.ts'
 
 interface Member {
   id: string
@@ -27,18 +34,11 @@ interface MessageRow {
   source_text: string
   translations: Record<string, string>
   status: 'pending' | 'translated' | 'failed'
+  created_at: string
 }
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const DEEPL_API_KEY = Deno.env.get('DEEPL_API_KEY')!
-
-// Las claves del plan Free terminan en `:fx` y usan un host distinto.
-const DEEPL_BASE =
-  Deno.env.get('DEEPL_API_URL') ??
-  (DEEPL_API_KEY?.endsWith(':fx')
-    ? 'https://api-free.deepl.com'
-    : 'https://api.deepl.com')
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -86,7 +86,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   if (body.usage === true) {
-    return await deeplUsage()
+    return json(await providerUsage())
   }
 
   const messageId = body.message_id
@@ -97,7 +97,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
   // 2. Cargar el mensaje y comprobar pertenencia a la sala -----------------
   const { data: message, error: msgError } = await admin
     .from('messages')
-    .select('id, room_id, sender_id, source_lang, source_text, translations, status')
+    .select(
+      'id, room_id, sender_id, source_lang, source_text, translations, status, created_at',
+    )
     .eq('id', messageId)
     .maybeSingle<MessageRow>()
 
@@ -156,13 +158,19 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   // 4. Traducir ------------------------------------------------------------
+  // Gemini sí aprovecha los mensajes anteriores para desambiguar pronombres y
+  // respuestas de una palabra; DeepL traduce cada mensaje aislado y no los usa.
+  const context =
+    activeProvider() === 'gemini' ? await recentContext(message) : []
+
   const translations: Record<string, string> = { ...existing }
   try {
     for (const target of missing) {
-      translations[target] = await deeplTranslate(
+      translations[target] = await translate(
         message.source_text,
         message.source_lang,
         target,
+        context,
       )
     }
   } catch (err) {
@@ -276,50 +284,26 @@ async function notifyOthers(
 
 // ---------------------------------------------------------------------------
 
-async function deeplTranslate(
-  text: string,
-  sourceLang: Lang,
-  targetLang: Lang,
-): Promise<string> {
-  const res = await fetch(`${DEEPL_BASE}/v2/translate`, {
-    method: 'POST',
-    headers: {
-      Authorization: `DeepL-Auth-Key ${DEEPL_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      text: [text],
-      source_lang: sourceLang.toUpperCase(),
-      target_lang: targetLang.toUpperCase(),
-      preserve_formatting: true,
-    }),
-  })
+const CONTEXT_MESSAGES = 4
 
-  if (!res.ok) {
-    const detail = (await res.text()).slice(0, 300)
-    throw new Error(`DeepL ${res.status}: ${detail}`)
-  }
+/** Los últimos mensajes de la sala anteriores a este, del más viejo al más nuevo. */
+async function recentContext(message: MessageRow): Promise<ContextMessage[]> {
+  const { data, error } = await admin
+    .from('messages')
+    .select('source_lang, source_text, sender_id, created_at')
+    .eq('room_id', message.room_id)
+    .lt('created_at', message.created_at)
+    .order('created_at', { ascending: false })
+    .limit(CONTEXT_MESSAGES)
 
-  const payload = (await res.json()) as {
-    translations?: { text: string }[]
-  }
-  const translated = payload.translations?.[0]?.text
-  if (typeof translated !== 'string') {
-    throw new Error('DeepL 200: respuesta sin traducción')
-  }
-  return translated
-}
+  if (error || !data) return []
 
-async function deeplUsage(): Promise<Response> {
-  const res = await fetch(`${DEEPL_BASE}/v2/usage`, {
-    headers: { Authorization: `DeepL-Auth-Key ${DEEPL_API_KEY}` },
-  })
-  if (!res.ok) {
-    return json({ error: `DeepL ${res.status}` }, 502)
-  }
-  const usage = (await res.json()) as {
-    character_count: number
-    character_limit: number
-  }
-  return json(usage)
+  return data
+    .slice()
+    .reverse()
+    .map((row) => ({
+      lang: row.source_lang as Lang,
+      text: String(row.source_text).slice(0, 300),
+      mine: row.sender_id === message.sender_id,
+    }))
 }

@@ -43,7 +43,10 @@ No hay cuentas que crear.
 
 ```bash
 supabase link --project-ref <ref>
+
+# Proveedor de traducción: UNO de los dos (ver más abajo)
 supabase secrets set DEEPL_API_KEY='...'      # la clave Free acaba en :fx
+# supabase secrets set GEMINI_API_KEY='...'   # alternativa sin tarjeta
 
 # Notificaciones (opcional; sin esto la app va igual, pero sin avisos)
 supabase secrets set VAPID_PUBLIC_KEY='...'
@@ -58,6 +61,30 @@ que declararlos.
 
 La función elige el host de DeepL según el sufijo de la clave (`:fx` → plan
 Free). Se puede forzar con el secret `DEEPL_API_URL`.
+
+### Proveedor de traducción
+
+Hay dos, y se elige solo según qué clave esté puesta. Si están las dos, manda
+DeepL.
+
+| | DeepL API Free | Gemini (Google AI Studio) |
+|---|---|---|
+| Coste | Gratis, 500.000 car./mes | Gratis, con límites por minuto |
+| Registro | **Pide tarjeta** para verificar identidad (no cobra) | Solo cuenta de Google, **sin tarjeta** |
+| Calidad en búlgaro | Muy buena | Buena |
+| Registro informal | No se puede controlar | Se le fija por prompt |
+| Contexto conversacional | No | Sí, los 4 mensajes anteriores |
+
+Es decir: Gemini arregla dos de las tres limitaciones conocidas de más abajo, a
+cambio de algo de calidad bruta. Cambiar de uno a otro es poner o quitar un
+secret — no toca ni el esquema ni el frontend.
+
+Los nombres de modelo de Gemini caducan. El secret `GEMINI_MODEL` lo fija
+(por defecto `gemini-2.5-flash`), y si ese modelo no existe para tu clave, el
+`error_detail` del mensaje trae la lista real de modelos disponibles en vez de
+un 404 mudo.
+
+Clave de Gemini: <https://aistudio.google.com/apikey>
 
 ### 3. Frontend
 
