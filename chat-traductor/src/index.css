@@ -8,15 +8,16 @@
     --surface: #18232f;
     --line: #2b3948;
     --lang-es: #e0a040;
-    --lang-bg: #48ada4;
+    --lang-bg: #e4699e;
     --text: #e9eef3;
     --muted: #8496a6;
 
     /* Fondo de burbuja por idioma de origen: el color de cada idioma mezclado
        con la superficie. Como cada participante escribe siempre en el suyo,
-       distingue a las dos personas y de paso dice en qué idioma se escribió. */
+       distingue a las dos personas y de paso dice en qué idioma se escribió.
+       El búlgaro va en rosa por petición expresa de quien lo escribe. */
     --bubble-es: #4e4433;
-    --bubble-bg: #264a50;
+    --bubble-bg: #744261;
 
     color-scheme: dark;
   }

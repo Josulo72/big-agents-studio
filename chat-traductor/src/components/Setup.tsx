@@ -80,10 +80,10 @@ export function Setup() {
       )}
 
       <p className="meta mt-6 leading-relaxed">
-        La clave está en Supabase, en <em>Project Settings → API Keys</em>, en la
-        fila <em>anon / public</em>. Tiene botón de copiar. No es un secreto: va
-        dentro de cualquier app de Supabase, y lo que protege la conversación son
-        las políticas de la base de datos.
+        La clave está en Supabase, en <em>Project Settings → API Keys</em>, en la fila{' '}
+        <em>anon / public</em>. Tiene botón de copiar. No es un secreto: va dentro de
+        cualquier app de Supabase, y lo que protege la conversación son las políticas de
+        la base de datos.
       </p>
     </main>
   )

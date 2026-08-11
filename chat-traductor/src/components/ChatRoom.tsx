@@ -4,6 +4,7 @@ import { MessageList } from './MessageList'
 import { Composer } from './Composer'
 import { TypingIndicator } from './TypingIndicator'
 import { NotifyToggle } from './NotifyToggle'
+import { SelfName } from './SelfName'
 import { useMessages } from '../hooks/useMessages'
 import { useTyping } from '../hooks/useTyping'
 import { useOnline, useTicker } from '../hooks/useOnline'
@@ -15,9 +16,10 @@ interface Props {
   profile: Profile
   room: Room
   members: Profile[]
+  onProfileChanged: () => void
 }
 
-export function ChatRoom({ profile, room, members }: Props) {
+export function ChatRoom({ profile, room, members, onProfileChanged }: Props) {
   const strings = t(profile.lang)
   const online = useOnline()
 
@@ -62,6 +64,9 @@ export function ChatRoom({ profile, room, members }: Props) {
         other={other}
         strings={strings}
         status={status}
+        self={
+          <SelfName profile={profile} strings={strings} onRenamed={onProfileChanged} />
+        }
         notify={
           <NotifyToggle
             state={push.state}

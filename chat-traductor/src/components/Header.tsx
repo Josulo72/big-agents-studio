@@ -8,9 +8,10 @@ interface Props {
   strings: Strings
   status: 'connected' | 'connecting' | 'offline'
   notify: ReactNode
+  self: ReactNode
 }
 
-export function Header({ title, other, strings, status, notify }: Props) {
+export function Header({ title, other, strings, status, notify, self }: Props) {
   return (
     <header className="safe-top sticky top-0 z-10 border-b border-line bg-surface px-3 pb-2">
       <div className="flex items-center gap-3">
@@ -34,6 +35,10 @@ export function Header({ title, other, strings, status, notify }: Props) {
                 {status === 'offline' ? strings.offline : strings.reconnecting}
               </span>
             )}
+            <span className="meta" aria-hidden="true">
+              ·
+            </span>
+            {self}
           </p>
         </div>
 

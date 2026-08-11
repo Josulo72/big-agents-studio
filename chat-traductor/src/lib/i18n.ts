@@ -35,6 +35,7 @@ const strings = {
     notifyOff: 'Activar avisos',
     notifyDenied: 'Avisos bloqueados en el navegador',
     notifyInstall: 'Instala la app para recibir avisos',
+    yourName: 'Tu nombre',
   },
   bg: {
     noRoom: 'Не си член на стая.',
@@ -66,6 +67,7 @@ const strings = {
     notifyOff: 'Включи известията',
     notifyDenied: 'Известията са блокирани в браузъра',
     notifyInstall: 'Инсталирай приложението, за да получаваш известия',
+    yourName: 'Твоето име',
   },
 } as const
 

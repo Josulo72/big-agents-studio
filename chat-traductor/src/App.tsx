@@ -73,7 +73,14 @@ function Chat() {
     )
   }
 
-  return <ChatRoom profile={profile} room={room} members={members} />
+  return (
+    <ChatRoom
+      profile={profile}
+      room={room}
+      members={members}
+      onProfileChanged={reload}
+    />
+  )
 }
 
 function Splash() {
