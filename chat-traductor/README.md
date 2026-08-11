@@ -69,7 +69,7 @@ DeepL.
 
 | | DeepL API Free | Gemini (Google AI Studio) |
 |---|---|---|
-| Coste | Gratis, 500.000 car./mes | Gratis, con límites por minuto |
+| Coste | Gratis; el límite lo indica la propia cuenta (`{"usage":true}`) | Gratis, con límites por minuto |
 | Registro | **Pide tarjeta** para verificar identidad (no cobra) | Solo cuenta de Google, **sin tarjeta** |
 | Calidad en búlgaro | Muy buena | Buena |
 | Registro informal | No se puede controlar | Se le fija por prompt |
@@ -301,9 +301,9 @@ npm run icons   # regenera los iconos de la PWA
 
 ## Consumo de DeepL
 
-El plan Free son 500.000 caracteres al mes. Para dos personas conversando a
-diario sobra, pero conviene mirarlo de vez en cuando. La propia Edge Function lo
-devuelve:
+El plan Free trae una cuota mensual de caracteres —la cifra exacta depende de
+la cuenta, así que mejor preguntarla que suponerla—. Para dos personas
+conversando a diario sobra. La propia Edge Function la devuelve:
 
 ```bash
 curl -s -X POST "$SUPABASE_URL/functions/v1/translate-message" \
