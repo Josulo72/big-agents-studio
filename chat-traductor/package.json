@@ -12,7 +12,8 @@
     "check:secrets": "node scripts/check-bundle-secrets.mjs",
     "icons": "node scripts/gen-icons.mjs",
     "fonts": "node scripts/fetch-fonts.mjs",
-    "verify:webpush": "esbuild supabase/functions/translate-message/webpush.ts --format=esm --outfile=node_modules/.tmp-webpush.mjs --log-level=error && node scripts/verify-webpush.mjs node_modules/.tmp-webpush.mjs"
+    "verify:webpush": "esbuild supabase/functions/translate-message/webpush.ts --format=esm --outfile=node_modules/.tmp-webpush.mjs --log-level=error && node scripts/verify-webpush.mjs node_modules/.tmp-webpush.mjs",
+    "bundle:function": "esbuild supabase/functions/translate-message/index.ts --bundle --format=esm --platform=neutral --target=es2022 --external:'jsr:*' --external:'npm:*' --external:'https://*' --outfile=supabase/functions/translate-message/BUNDLE.ts --banner:js=\"// VERSION DE UN SOLO FICHERO - generada por 'npm run bundle:function', no editar a mano.\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
