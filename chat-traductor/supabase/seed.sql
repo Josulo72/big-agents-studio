@@ -8,14 +8,14 @@
 -- Requisito previo en el panel:
 --   Authentication → Sign In / Providers → "Allow anonymous sign-ins" activado.
 --
--- Cambia los dos nombres y ejecuta. Es idempotente.
+-- Es idempotente: se puede relanzar sin romper nada.
 -- ---------------------------------------------------------------------------
 
 do $$
 declare
   v_room_name text := 'Casa';
-  v_name_es   text := 'Jose';   -- <-- cambiar
-  v_name_bg   text := 'Ива';    -- <-- cambiar
+  v_name_es   text := 'Jorge';
+  v_name_bg   text := 'Diana';
   v_room      uuid;
 begin
   select id into v_room from public.rooms where name = v_room_name limit 1;
