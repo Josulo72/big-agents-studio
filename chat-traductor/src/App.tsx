@@ -2,10 +2,18 @@ import { useEffect } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { useWorkspace } from './hooks/useWorkspace'
 import { ClaimSlot } from './components/ClaimSlot'
+import { Setup } from './components/Setup'
+import { hasConfig } from './lib/supabase'
 import { ChatRoom } from './components/ChatRoom'
 import { t } from './lib/i18n'
 
 export default function App() {
+  // Sin configuración no hay nada que hacer: ni sesión, ni sala, ni mensajes.
+  if (!hasConfig) return <Setup />
+  return <Chat />
+}
+
+function Chat() {
   const { session, ready, error: authError } = useAuth()
   const userId = session?.user?.id ?? null
   const { loading, profile, room, members, error, reload } = useWorkspace(userId)
@@ -19,11 +27,25 @@ export default function App() {
   if (!ready) return <Splash />
 
   if (authError || !session) {
+    // El tropiezo más probable en la puesta en marcha: el interruptor de
+    // sesiones anónimas viene apagado de fábrica y el error de Supabase no
+    // dice dónde se enciende.
+    const esAnonimoDesactivado = /anonymous/i.test(authError ?? '')
     return (
       <Centered>
-        <p className="text-sm" style={{ color: 'var(--lang-es)' }}>
-          {authError ?? 'No se pudo abrir sesión.'}
-        </p>
+        <div className="max-w-xs">
+          <p className="text-sm" style={{ color: 'var(--lang-es)' }}>
+            {esAnonimoDesactivado
+              ? 'Faltan por permitir las sesiones anónimas.'
+              : (authError ?? 'No se pudo abrir sesión.')}
+          </p>
+          {esAnonimoDesactivado && (
+            <p className="meta mt-3 leading-relaxed">
+              En Supabase: Authentication → Sign In / Providers → activa «Allow
+              anonymous sign-ins». Luego recarga esta página.
+            </p>
+          )}
+        </div>
       </Centered>
     )
   }

@@ -3,7 +3,11 @@
    (REST, Realtime, Auth, Functions) pasan de largo siempre. */
 
 const CACHE = 'chat-shell-v1'
-const SHELL = ['/', '/index.html', '/manifest.webmanifest']
+
+// La app puede estar servida en la raíz o en un subdirectorio. La base se
+// deduce de dónde vive este propio fichero, así vale para las dos.
+const BASE = new URL('./', self.location).pathname
+const SHELL = [BASE, `${BASE}index.html`, `${BASE}manifest.webmanifest`]
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -45,7 +49,7 @@ self.addEventListener('push', (event) => {
     // notificación en vez de llenar el centro de notificaciones.
     tag: data.tag || 'chat',
     renotify: true,
-    data: { url: data.url || '/' },
+    data: { url: data.url || BASE },
   }
 
   event.waitUntil(self.registration.showNotification(title, options))
@@ -53,7 +57,7 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-  const target = new URL(event.notification.data?.url || '/', self.location.origin).href
+  const target = new URL(event.notification.data?.url || BASE, self.location.origin).href
 
   event.waitUntil(
     self.clients
@@ -85,12 +89,12 @@ self.addEventListener('fetch', (event) => {
       fetch(request)
         .then((response) => {
           const copy = response.clone()
-          caches.open(CACHE).then((cache) => cache.put('/index.html', copy))
+          caches.open(CACHE).then((cache) => cache.put(`${BASE}index.html`, copy))
           return response
         })
         .catch(() =>
           caches
-            .match('/index.html')
+            .match(`${BASE}index.html`)
             .then((cached) => cached || Response.error()),
         ),
     )
@@ -100,9 +104,9 @@ self.addEventListener('fetch', (event) => {
   // Assets inmutables: caché primero. Con las fuentes dentro, la app abre
   // offline sin caer al fallback del sistema.
   if (
-    url.pathname.startsWith('/assets/') ||
-    url.pathname.startsWith('/icons/') ||
-    url.pathname.startsWith('/fonts/')
+    url.pathname.startsWith(`${BASE}assets/`) ||
+    url.pathname.startsWith(`${BASE}icons/`) ||
+    url.pathname.startsWith(`${BASE}fonts/`)
   ) {
     event.respondWith(
       caches.match(request).then(

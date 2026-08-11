@@ -85,7 +85,9 @@ for (const spec of FAMILIES) {
         `  font-style: normal;`,
         `  font-weight: ${face.weight};`,
         `  font-display: swap;`,
-        `  src: url('/fonts/${name}') format('woff2');`,
+        // Relativa al propio fonts.css: así vale igual servida en la raíz de
+        // un dominio que en un subdirectorio (GitHub Pages).
+        `  src: url('./${name}') format('woff2');`,
         `  unicode-range: ${face.range};`,
         `}`,
       ].join('\n'),
