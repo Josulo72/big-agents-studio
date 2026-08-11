@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Header } from './Header'
 import { MessageList } from './MessageList'
 import { Composer } from './Composer'
 import { TypingIndicator } from './TypingIndicator'
 import { NotifyToggle } from './NotifyToggle'
 import { SelfName } from './SelfName'
+import { Backdrop } from './Backdrop'
 import { useMessages } from '../hooks/useMessages'
 import { useTyping } from '../hooks/useTyping'
 import { useOnline, useTicker } from '../hooks/useOnline'
@@ -41,6 +42,7 @@ export function ChatRoom({ profile, room, members, onProfileChanged }: Props) {
 
   const { typingName, notifyTyping, notifyStopped } = useTyping(room.id, profile)
   const push = usePush(profile)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const hasPending = messages.some((message) => message.status === 'pending')
   const now = useTicker(hasPending)
@@ -58,50 +60,59 @@ export function ChatRoom({ profile, room, members, onProfileChanged }: Props) {
       : ('connecting' as const)
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-2xl flex-col">
-      <Header
-        title={room.name}
-        other={other}
-        strings={strings}
-        status={status}
-        self={
-          <SelfName profile={profile} strings={strings} onRenamed={onProfileChanged} />
-        }
-        notify={
-          <NotifyToggle
-            state={push.state}
-            strings={strings}
-            onEnable={() => void push.enable()}
-            onDisable={() => void push.disable()}
-          />
-        }
-      />
+    <>
+      <Backdrop />
+      <div className="mx-auto flex h-full w-full max-w-2xl flex-col">
+        <Header
+          title={room.name}
+          other={other}
+          strings={strings}
+          status={status}
+          menuOpen={menuOpen}
+          onToggleMenu={() => setMenuOpen((open) => !open)}
+          self={
+            <SelfName
+              profile={profile}
+              strings={strings}
+              onRenamed={onProfileChanged}
+            />
+          }
+          notify={
+            <NotifyToggle
+              state={push.state}
+              strings={strings}
+              onEnable={() => void push.enable()}
+              onDisable={() => void push.disable()}
+            />
+          }
+        />
 
-      <MessageList
-        messages={messages}
-        viewerId={profile.id}
-        viewerLang={profile.lang}
-        strings={strings}
-        now={now}
-        hasMore={hasMore}
-        loading={loading}
-        loadingOlder={loadingOlder}
-        onLoadOlder={loadOlder}
-        onRetry={retry}
-      />
+        <MessageList
+          messages={messages}
+          viewerId={profile.id}
+          viewerLang={profile.lang}
+          strings={strings}
+          now={now}
+          hasMore={hasMore}
+          loading={loading}
+          loadingOlder={loadingOlder}
+          onLoadOlder={loadOlder}
+          onRetry={retry}
+        />
 
-      <TypingIndicator name={typingName} strings={strings} />
+        <TypingIndicator name={typingName} strings={strings} />
 
-      {/* El compositor nunca se bloquea: `navigator.onLine` da falsos negativos
+        {/* El compositor nunca se bloquea: `navigator.onLine` da falsos negativos
           con demasiada frecuencia. Si el envío falla, la burbuja se queda
           marcada como no enviada y con botón de reintento. */}
-      <Composer
-        strings={strings}
-        lang={profile.lang}
-        onSend={(text) => void send(text)}
-        onTyping={notifyTyping}
-        onStopped={notifyStopped}
-      />
-    </div>
+        <Composer
+          strings={strings}
+          lang={profile.lang}
+          onSend={(text) => void send(text)}
+          onTyping={notifyTyping}
+          onStopped={notifyStopped}
+        />
+      </div>
+    </>
   )
 }

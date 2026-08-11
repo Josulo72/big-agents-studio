@@ -86,14 +86,21 @@ export function ClaimSlot({ onClaimed }: { onClaimed: () => void }) {
               type="button"
               onClick={() => void claim(slot)}
               disabled={claiming !== null}
-              className="btn flex items-center gap-3 px-4 py-3 text-left"
-              style={{ borderColor: `var(--lang-${slot.lang})` }}
+              className="flex items-center gap-3 rounded-[22px] px-4 py-4 text-left text-white shadow-[0_8px_24px_rgba(0,0,0,0.4)] transition-transform duration-150 active:scale-[0.98]"
+              style={{
+                background:
+                  slot.lang === 'es'
+                    ? 'linear-gradient(140deg, var(--me-1), var(--me-2))'
+                    : 'linear-gradient(140deg, var(--you-1), var(--you-2))',
+              }}
             >
-              <span className="meta" style={{ color: `var(--lang-${slot.lang})` }}>
+              <span className="font-mono text-[11px] text-white/80">
                 {langLabel[slot.lang]}
               </span>
-              <span className="flex-1 text-base">{slot.display_name}</span>
-              {claiming === slot.lang && <span className="meta">···</span>}
+              <span className="flex-1 text-[17px] font-medium">
+                {slot.display_name}
+              </span>
+              {claiming === slot.lang && <span className="text-white/80">···</span>}
             </button>
           ))}
         </div>

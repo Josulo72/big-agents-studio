@@ -120,7 +120,7 @@ export function MessageList({
           <p className="meta mt-8 text-center">{strings.noMessages}</p>
         )}
 
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-2.5">
           {messages.map((message, index) => {
             const previous = messages[index - 1]
             const showDay =
@@ -128,12 +128,10 @@ export function MessageList({
             return (
               <Fragment key={message.client_id}>
                 {showDay && (
-                  <li className="my-2 flex items-center gap-3" aria-hidden="false">
-                    <span className="h-px flex-1 bg-line" />
-                    <span className="meta">
+                  <li className="my-3 flex justify-center" aria-hidden="false">
+                    <span className="glass rounded-full px-3 py-1 font-mono text-[11px] tracking-wide text-white/80">
                       {dayLabel(message.created_at, viewerLang, strings)}
                     </span>
-                    <span className="h-px flex-1 bg-line" />
                   </li>
                 )}
                 <MessageBubble

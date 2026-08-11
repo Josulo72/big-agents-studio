@@ -3,13 +3,20 @@ import { useAuth } from './hooks/useAuth'
 import { useWorkspace } from './hooks/useWorkspace'
 import { ClaimSlot } from './components/ClaimSlot'
 import { Setup } from './components/Setup'
+import { Backdrop } from './components/Backdrop'
 import { hasConfig } from './lib/supabase'
 import { ChatRoom } from './components/ChatRoom'
 import { t } from './lib/i18n'
 
 export default function App() {
   // Sin configuración no hay nada que hacer: ni sesión, ni sala, ni mensajes.
-  if (!hasConfig) return <Setup />
+  if (!hasConfig)
+    return (
+      <>
+        <Backdrop />
+        <Setup />
+      </>
+    )
   return <Chat />
 }
 
@@ -51,7 +58,13 @@ function Chat() {
   }
 
   if (loading) return <Splash />
-  if (!profile) return <ClaimSlot onClaimed={reload} />
+  if (!profile)
+    return (
+      <>
+        <Backdrop />
+        <ClaimSlot onClaimed={reload} />
+      </>
+    )
 
   const strings = t(profile.lang)
 

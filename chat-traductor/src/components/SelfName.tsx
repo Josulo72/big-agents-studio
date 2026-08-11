@@ -53,7 +53,7 @@ export function SelfName({
           setEditing(true)
         }}
         title={strings.yourName}
-        className="meta flex shrink-0 items-center gap-1 underline underline-offset-2 transition-colors duration-120 hover:text-text"
+        className="meta flex shrink-0 items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 transition-colors duration-150 hover:bg-white/20 hover:text-text"
       >
         <span style={{ color: `var(--lang-${profile.lang})` }}>
           {langLabel[profile.lang]}

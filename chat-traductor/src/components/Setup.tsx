@@ -68,13 +68,17 @@ export function Setup() {
           />
         </div>
 
-        <button type="submit" className="btn">
+        <button
+          type="submit"
+          className="rounded-full px-4 py-3 font-medium text-white shadow-[0_0_20px_-6px_rgba(255,59,141,0.9)] transition-transform duration-150 active:scale-95"
+          style={{ background: 'linear-gradient(140deg, var(--me-1), var(--me-2))' }}
+        >
           Entrar
         </button>
       </form>
 
       {error && (
-        <p className="mt-4 text-sm" style={{ color: 'var(--lang-es)' }}>
+        <p className="mt-4 text-sm" style={{ color: 'var(--me-1)' }}>
           {error}
         </p>
       )}

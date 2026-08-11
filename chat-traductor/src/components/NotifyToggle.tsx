@@ -39,8 +39,8 @@ export function NotifyToggle({ state, strings, onEnable, onDisable }: Props) {
       onClick={on ? onDisable : onEnable}
       aria-pressed={on}
       title={on ? strings.notifyOn : strings.notifyOff}
-      className="meta shrink-0 underline underline-offset-2 transition-colors duration-120 hover:text-text"
-      style={on ? { color: 'var(--lang-bg)' } : undefined}
+      className="meta shrink-0 rounded-full bg-white/10 px-3 py-1 transition-colors duration-150 hover:bg-white/20 hover:text-text"
+      style={on ? { color: 'var(--me-1)' } : undefined}
     >
       {on ? strings.notifyOn : strings.notifyOff}
     </button>

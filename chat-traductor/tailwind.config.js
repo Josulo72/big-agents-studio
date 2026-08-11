@@ -4,9 +4,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: 'var(--ink)',
-        surface: 'var(--surface)',
-        line: 'var(--line)',
+        night: 'var(--night-0)',
+        me: 'var(--me-1)',
+        you: 'var(--you-1)',
         'lang-es': 'var(--lang-es)',
         'lang-bg': 'var(--lang-bg)',
         text: 'var(--text)',
@@ -18,8 +18,8 @@ export default {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       borderRadius: {
-        bubble: '14px',
-        control: '8px',
+        bubble: '22px',
+        control: '9999px',
       },
       transitionDuration: {
         120: '120ms',

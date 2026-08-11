@@ -36,6 +36,7 @@ const strings = {
     notifyDenied: 'Avisos bloqueados en el navegador',
     notifyInstall: 'Instala la app para recibir avisos',
     yourName: 'Tu nombre',
+    options: 'Opciones',
   },
   bg: {
     noRoom: 'Не си член на стая.',
@@ -68,6 +69,7 @@ const strings = {
     notifyDenied: 'Известията са блокирани в браузъра',
     notifyInstall: 'Инсталирай приложението, за да получаваш известия',
     yourName: 'Твоето име',
+    options: 'Настройки',
   },
 } as const
 

@@ -4,20 +4,32 @@
 
 @layer base {
   :root {
-    --ink: #0f1620;
-    --surface: #18232f;
-    --line: #2b3948;
-    --lang-es: #e0a040;
-    --lang-bg: #e4699e;
-    --text: #e9eef3;
-    --muted: #8496a6;
+    /* --- Identidad de interlocutor -------------------------------------
+       Rosa = quien mira. Azul = la otra persona. Es lo primero que lee el
+       ojo, así que manda sobre cualquier otro color de la interfaz. */
+    --me-1: #ff3b8d;
+    --me-2: #e91e73;
+    --you-1: #168bff;
+    --you-2: #075fcc;
 
-    /* Fondo de burbuja por idioma de origen: el color de cada idioma mezclado
-       con la superficie. Como cada participante escribe siempre en el suyo,
-       distingue a las dos personas y de paso dice en qué idioma se escribió.
-       El búlgaro va en rosa por petición expresa de quien lo escribe. */
-    --bubble-es: #4e4433;
-    --bubble-bg: #744261;
+    /* --- Fondo azul noche ---------------------------------------------- */
+    --night-0: #070716;
+    --night-1: #0d1330;
+    --violet: #3a1c6b;
+    --magenta: #6d1a4c;
+
+    --text: #ffffff;
+    --muted: #a7b3d4;
+    --hairline: rgba(255, 255, 255, 0.12);
+
+    /* --- Cristal --------------------------------------------------------- */
+    --glass: rgba(18, 22, 52, 0.55);
+    --glass-strong: rgba(12, 16, 40, 0.72);
+
+    /* Identidad de idioma: se mantiene, pero en papel secundario. El color
+       fuerte ya lo usa el interlocutor, así que aquí solo matiza. */
+    --lang-es: #ffb35c;
+    --lang-bg: #ff8fc0;
 
     color-scheme: dark;
   }
@@ -30,7 +42,7 @@
 
   body {
     margin: 0;
-    background-color: var(--ink);
+    background-color: var(--night-0);
     color: var(--text);
     font-family: 'Golos Text', system-ui, sans-serif;
     font-size: 16px;
@@ -40,15 +52,14 @@
     overscroll-behavior-y: none;
   }
 
-  /* Foco de teclado siempre visible, nunca suprimido. */
   :focus-visible {
-    outline: 2px solid var(--text);
+    outline: 2px solid var(--me-1);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 8px;
   }
 
   ::selection {
-    background: var(--line);
+    background: rgba(255, 59, 141, 0.35);
   }
 
   input,
@@ -66,19 +77,83 @@
 }
 
 @layer components {
+  /* --- Cristal --------------------------------------------------------- */
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid var(--hairline);
+  }
+
+  .glass-strong {
+    background: var(--glass-strong);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+  }
+
+  /* --- Burbujas -------------------------------------------------------- */
+  .bubble {
+    position: relative;
+    padding: 10px 14px;
+    max-width: 100%;
+    box-shadow:
+      0 6px 18px rgba(0, 0, 0, 0.35),
+      0 0 22px -8px var(--glow);
+  }
+
+  /* Radios ligeramente orgánicos: la esquina del lado de quien habla es la
+     que se cierra, y de ahí sale la cola. */
+  .bubble-me {
+    --glow: rgba(255, 59, 141, 0.75);
+    background: linear-gradient(140deg, var(--me-1) 0%, var(--me-2) 100%);
+    border-radius: 22px 22px 6px 22px;
+  }
+
+  .bubble-you {
+    --glow: rgba(22, 139, 255, 0.7);
+    background: linear-gradient(140deg, var(--you-1) 0%, var(--you-2) 100%);
+    border-radius: 22px 22px 22px 6px;
+  }
+
+  /* Cola: un triángulo hecho con bordes. Sin clip-path ni máscaras, que en
+     Safari dan sorpresas, y siempre alineado con la esquina cerrada. */
+  .bubble-me::after,
+  .bubble-you::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+  }
+
+  .bubble-me::after {
+    right: -7px;
+    border-left: 10px solid var(--me-2);
+  }
+
+  .bubble-you::after {
+    left: -7px;
+    border-right: 10px solid var(--you-2);
+  }
+
+  /* --- Controles ------------------------------------------------------- */
   .btn {
-    @apply rounded-control border border-line bg-surface px-3 py-2 text-sm
-           transition-colors duration-120 hover:border-muted
+    @apply rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm
+           transition-all duration-150 active:scale-95
            disabled:cursor-not-allowed disabled:opacity-40;
   }
 
   .field {
-    @apply w-full rounded-control border border-line bg-surface px-3 py-2
-           text-text placeholder:text-muted focus:border-muted focus:outline-none;
+    @apply w-full rounded-full border border-white/10 bg-white/[0.07] px-4 py-2.5
+           text-text placeholder:text-muted focus:border-white/25 focus:outline-none;
   }
 
-  /* Mono para metadatos, pero sin versalitas: en cirílico las mayúsculas
-     cuestan de leer y el nombre de una persona no se grita. */
+  .icon-btn {
+    @apply grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted
+           transition-all duration-150 hover:bg-white/10 hover:text-text active:scale-90;
+  }
+
   .meta {
     @apply font-mono text-[11px] tracking-wide text-muted;
   }
@@ -110,7 +185,31 @@
   }
 }
 
-/* Sin animación para quien la ha desactivado en el sistema. */
+/* --- Animaciones ------------------------------------------------------- */
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-bubble-in {
+  animation: bubble-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(0, -18px, 0) scale(1.06);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
