@@ -19,6 +19,12 @@ const langColorVar: Record<Lang, string> = {
   bg: 'var(--lang-bg)',
 }
 
+/** Fondo de la burbuja según el idioma en que se escribió el mensaje. */
+const bubbleBgVar: Record<Lang, string> = {
+  es: 'var(--bubble-es)',
+  bg: 'var(--bubble-bg)',
+}
+
 export function MessageBubble({
   message,
   viewerLang,
@@ -67,10 +73,8 @@ export function MessageBubble({
     >
       <div className="flex max-w-[85%] flex-col gap-1 sm:max-w-[75%]">
         <div
-          className={[
-            'rounded-bubble px-3 py-2',
-            isOwn ? 'border border-line bg-transparent' : 'bg-surface',
-          ].join(' ')}
+          className="rounded-bubble px-3 py-2"
+          style={{ backgroundColor: bubbleBgVar[message.source_lang] }}
         >
           {isTranslation ? (
             <button

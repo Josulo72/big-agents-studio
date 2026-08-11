@@ -12,6 +12,12 @@
     --text: #e9eef3;
     --muted: #8496a6;
 
+    /* Fondo de burbuja por idioma de origen: el color de cada idioma mezclado
+       con la superficie. Como cada participante escribe siempre en el suyo,
+       distingue a las dos personas y de paso dice en qué idioma se escribió. */
+    --bubble-es: #4e4433;
+    --bubble-bg: #264a50;
+
     color-scheme: dark;
   }
 
