@@ -24,7 +24,10 @@ En el SQL Editor, ejecutar en este orden:
 1. `supabase/migrations/0001_init.sql` — tablas, RLS, publicación de Realtime.
 2. `supabase/migrations/0002_acceso_sin_login.sql` — plazas reclamables.
 3. `supabase/migrations/0003_push.sql` — suscripciones de notificaciones.
-4. `supabase/seed.sql` — la sala y sus dos plazas. **Editar antes** los dos
+4. `supabase/migrations/0004_retirar_andamiaje_pruebas.sql` — limpieza de la
+   prueba de RLS que se hizo durante la puesta en marcha. En una instalación
+   nueva no encuentra nada y no hace nada.
+5. `supabase/seed.sql` — la sala y sus dos plazas. **Editar antes** los dos
    nombres.
 
 Y en el panel:

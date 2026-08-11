@@ -44,7 +44,7 @@ export function useWorkspace(userId: string | null) {
       return
     }
     if (!profile) {
-      // Sin perfil todavía: la app pedirá nombre e idioma.
+      // Sin perfil todavía: la app mostrará las plazas libres para reclamar una.
       setState({ ...initial, loading: false })
       return
     }

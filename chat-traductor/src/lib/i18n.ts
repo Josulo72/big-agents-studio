@@ -6,23 +6,6 @@ import type { Lang } from './types'
  */
 const strings = {
   es: {
-    signInTitle: 'Acceso',
-    signInHint: 'Te enviamos un enlace de un solo uso.',
-    emailLabel: 'Correo',
-    sendLink: 'Enviar enlace',
-    sending: 'Enviando…',
-    linkSent: 'Enlace enviado. Revisa el correo.',
-    signOut: 'Salir',
-
-    profileTitle: 'Tu perfil',
-    profileHint: 'Solo se pide una vez.',
-    displayName: 'Nombre',
-    language: 'Idioma',
-    spanish: 'Español',
-    bulgarian: 'Búlgaro',
-    save: 'Guardar',
-    saving: 'Guardando…',
-
     noRoom: 'No perteneces a ninguna sala.',
     loading: 'Cargando…',
     noMessages: 'Sin mensajes todavía.',
@@ -45,7 +28,6 @@ const strings = {
     reconnecting: 'Reconectando…',
     today: 'Hoy',
     yesterday: 'Ayer',
-    newMessages: 'Mensajes nuevos',
 
     noFreeSlots: 'No quedan plazas libres en esta sala.',
     claimHint: 'Se guarda en este dispositivo. No hace falta contraseña ni correo.',
@@ -53,26 +35,8 @@ const strings = {
     notifyOff: 'Activar avisos',
     notifyDenied: 'Avisos bloqueados en el navegador',
     notifyInstall: 'Instala la app para recibir avisos',
-    newMessage: 'Mensaje nuevo',
   },
   bg: {
-    signInTitle: 'Вход',
-    signInHint: 'Изпращаме ти еднократна връзка.',
-    emailLabel: 'Имейл',
-    sendLink: 'Изпрати връзка',
-    sending: 'Изпраща се…',
-    linkSent: 'Връзката е изпратена. Провери имейла.',
-    signOut: 'Изход',
-
-    profileTitle: 'Твоят профил',
-    profileHint: 'Пита се само веднъж.',
-    displayName: 'Име',
-    language: 'Език',
-    spanish: 'Испански',
-    bulgarian: 'Български',
-    save: 'Запази',
-    saving: 'Запазва се…',
-
     noRoom: 'Не си член на стая.',
     loading: 'Зарежда се…',
     noMessages: 'Още няма съобщения.',
@@ -95,7 +59,6 @@ const strings = {
     reconnecting: 'Свързва се…',
     today: 'Днес',
     yesterday: 'Вчера',
-    newMessages: 'Нови съобщения',
 
     noFreeSlots: 'В тази стая няма свободни места.',
     claimHint: 'Запазва се на това устройство. Не е нужна парола или имейл.',
@@ -103,7 +66,6 @@ const strings = {
     notifyOff: 'Включи известията',
     notifyDenied: 'Известията са блокирани в браузъра',
     notifyInstall: 'Инсталирай приложението, за да получаваш известия',
-    newMessage: 'Ново съобщение',
   },
 } as const
 
