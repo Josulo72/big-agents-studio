@@ -1,0 +1,40 @@
+# Configuración de Netlify para la app de chat.
+#
+# Netlify lee este fichero en la RAÍZ del repositorio, no dentro de la carpeta
+# del proyecto. Por eso vive aquí y apunta a `chat-traductor/` con `base`:
+# importando el repositorio tal cual, el build sale bien sin tocar ajustes.
+#
+# El sitio estático de la raíz (index.html y compañía) no se despliega desde
+# aquí. Si algún día se quiere publicar también, lo suyo es un segundo sitio
+# de Netlify con su propia configuración.
+
+[build]
+  base = "chat-traductor"
+  command = "npm run build"
+  publish = "dist"
+
+# SPA: cualquier ruta la resuelve el index.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
