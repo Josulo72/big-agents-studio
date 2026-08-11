@@ -2,6 +2,8 @@ export type Lang = 'es' | 'bg'
 
 export type MessageStatus = 'pending' | 'translated' | 'failed'
 
+export type MessageKind = 'text' | 'voice' | 'image' | 'file'
+
 export interface Profile {
   id: string
   display_name: string
@@ -19,13 +21,19 @@ export interface Message {
   id: string
   room_id: string
   sender_id: string
-  kind: 'text' | 'voice'
+  kind: MessageKind
   source_lang: Lang
   source_text: string
   translations: Partial<Record<Lang, string>>
   status: MessageStatus
   error_detail: string | null
+  /** Ruta dentro del almacén, no una URL pública: el enlace se firma al verlo. */
   media_url: string | null
+  media_name: string | null
+  media_mime: string | null
+  media_size: number | null
+  media_width: number | null
+  media_height: number | null
   client_id: string
   created_at: string
 }
@@ -38,6 +46,15 @@ export interface Message {
  */
 export interface ChatMessage extends Message {
   unsent?: boolean
+  /** Vista previa local mientras el fichero sube. Nunca se persiste. */
+  localPreview?: string
+  /** 0..1 mientras sube. */
+  uploading?: number
+}
+
+/** Un mensaje sin texto (una foto suelta) no tiene nada que traducir. */
+export function needsTranslation(message: Message) {
+  return message.source_text.trim().length > 0
 }
 
 /**

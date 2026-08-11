@@ -8,6 +8,7 @@ interface Props {
   lang: Lang
   disabled?: boolean
   onSend: (text: string) => void
+  onAttach: (files: File[]) => void
   onTyping: () => void
   onStopped: () => void
 }
@@ -22,12 +23,14 @@ export function Composer({
   lang,
   disabled,
   onSend,
+  onAttach,
   onTyping,
   onStopped,
 }: Props) {
   const [value, setValue] = useState('')
   const [emojiOpen, setEmojiOpen] = useState(false)
   const areaRef = useRef<HTMLTextAreaElement>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   // Alto automático hasta un tope, para que el teclado no se coma la pantalla.
   useEffect(() => {
@@ -78,6 +81,38 @@ export function Composer({
           submit()
         }}
       >
+        <input
+          ref={fileRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(event) => {
+            const files = Array.from(event.target.files ?? [])
+            if (files.length) onAttach(files)
+            // Se limpia para poder volver a elegir el mismo fichero.
+            event.target.value = ''
+            setEmojiOpen(false)
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          aria-label={strings.attach}
+          className="icon-btn"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinecap="round"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+
         <button
           type="button"
           onClick={() => setEmojiOpen((open) => !open)}

@@ -1,5 +1,11 @@
 import { useState } from 'react'
-import { displayText, type ChatMessage, type Lang } from '../lib/types'
+import {
+  displayText,
+  needsTranslation,
+  type ChatMessage,
+  type Lang,
+} from '../lib/types'
+import { Attachment } from './Attachment'
 import { langLabel, localeOf, type Strings } from '../lib/i18n'
 
 /** Un mensaje pendiente más de esto se considera atascado y ofrece reintento. */
@@ -25,6 +31,10 @@ export function MessageBubble({
   const [openEcho, setOpenEcho] = useState(false)
 
   const { text, isTranslation } = displayText(message, viewerLang, isOwn)
+  const tieneAdjunto =
+    message.kind !== 'text' && (!!message.media_url || !!message.localPreview)
+  // Una foto sin pie no está pendiente de nada: no se anuncia como tal.
+  const traducible = needsTranslation(message)
 
   const time = new Date(message.created_at).toLocaleTimeString(localeOf[viewerLang], {
     hour: '2-digit',
@@ -34,12 +44,13 @@ export function MessageBubble({
   // Una traducción que tarda demasiado no es un fallo: se sigue anunciando
   // como en curso, solo que además se ofrece reintentar.
   const stuck =
+    traducible &&
     message.status === 'pending' &&
     now - new Date(message.created_at).getTime() > STUCK_AFTER_MS
   const showRetry = message.status === 'failed' || stuck
 
   const label =
-    message.status === 'pending'
+    message.status === 'pending' && traducible
       ? strings.translating
       : message.unsent
         ? strings.notSent
@@ -75,6 +86,7 @@ export function MessageBubble({
                 message={message}
                 isOwn={isOwn}
                 showTick={isOwn}
+                adjunto={tieneAdjunto}
               />
               <Echo
                 open={openEcho}
@@ -90,6 +102,7 @@ export function MessageBubble({
               message={message}
               isOwn={isOwn}
               showTick={isOwn}
+              adjunto={tieneAdjunto}
             />
           )}
         </div>
@@ -143,38 +156,43 @@ function Contenido({
   message,
   isOwn,
   showTick,
+  adjunto,
 }: {
   text: string
   time: string
   message: ChatMessage
   isOwn: boolean
   showTick: boolean
+  adjunto: boolean
 }) {
   return (
-    <p className="whitespace-pre-wrap break-words text-[15px] leading-snug text-white">
-      {text}
-      {/* Espacio fantasma: reserva sitio en la última línea para que la hora
+    <>
+      {adjunto && <Attachment message={message} />}
+      <p className="whitespace-pre-wrap break-words text-[15px] leading-snug text-white">
+        {text}
+        {/* Espacio fantasma: reserva sitio en la última línea para que la hora
           nunca se monte encima del texto. */}
-      <span className="pointer-events-none inline-block w-[68px] select-none opacity-0">
-        .
-      </span>
-      <span
-        className={[
-          'absolute bottom-1.5 right-3 flex items-center gap-1',
-          'font-mono text-[10px] tracking-wide',
-          isOwn ? 'text-white/70' : 'text-white/65',
-        ].join(' ')}
-      >
-        <span
-          className="text-[9px] uppercase opacity-80"
-          title={message.source_lang === 'es' ? 'Español' : 'Български'}
-        >
-          {langLabel[message.source_lang]}
+        <span className="pointer-events-none inline-block w-[68px] select-none opacity-0">
+          .
         </span>
-        <time dateTime={message.created_at}>{time}</time>
-        {showTick && <Checks message={message} />}
-      </span>
-    </p>
+        <span
+          className={[
+            'absolute bottom-1.5 right-3 flex items-center gap-1',
+            'font-mono text-[10px] tracking-wide',
+            isOwn ? 'text-white/70' : 'text-white/65',
+          ].join(' ')}
+        >
+          <span
+            className="text-[9px] uppercase opacity-80"
+            title={message.source_lang === 'es' ? 'Español' : 'Български'}
+          >
+            {langLabel[message.source_lang]}
+          </span>
+          <time dateTime={message.created_at}>{time}</time>
+          {showTick && <Checks message={message} />}
+        </span>
+      </p>
+    </>
   )
 }
 

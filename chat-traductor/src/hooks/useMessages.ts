@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { compareMessages, mergeMessages } from '../lib/merge'
-import type { ChatMessage, Message, Profile } from '../lib/types'
+import { BUCKET, medirImagen, nombreSeguro } from '../lib/media'
+import type { ChatMessage, Message, MessageKind, Profile } from '../lib/types'
 
 export const PAGE_SIZE = 30
 
@@ -15,7 +16,9 @@ const SYNC_MAX_PAGES = 10
 export type Connection = 'connecting' | 'connected' | 'error'
 
 const COLUMNS =
-  'id, room_id, sender_id, kind, source_lang, source_text, translations, status, error_detail, media_url, client_id, created_at'
+  'id, room_id, sender_id, kind, source_lang, source_text, translations, status, ' +
+  'error_detail, media_url, media_name, media_mime, media_size, media_width, ' +
+  'media_height, client_id, created_at'
 
 interface Options {
   roomId: string | null
@@ -259,9 +262,16 @@ export function useMessages({ roomId, profile }: Options) {
         .insert({
           room_id: draft.room_id,
           sender_id: draft.sender_id,
+          kind: draft.kind,
           source_lang: draft.source_lang,
           source_text: draft.source_text,
           client_id: draft.client_id,
+          media_url: draft.media_url,
+          media_name: draft.media_name,
+          media_mime: draft.media_mime,
+          media_size: draft.media_size,
+          media_width: draft.media_width,
+          media_height: draft.media_height,
         })
         .select(COLUMNS)
         .maybeSingle<Message>()
@@ -293,37 +303,118 @@ export function useMessages({ roomId, profile }: Options) {
 
       if (data) {
         apply([data])
-        void translate(data.id)
+        // Una foto suelta no tiene nada que traducir.
+        if (data.source_text.trim()) void translate(data.id)
       }
     },
     [apply, translate],
   )
 
-  const send = useCallback(
-    async (text: string) => {
-      const body = text.trim()
-      if (!body || !roomId || !profile) return
-
-      const clientId = crypto.randomUUID()
-      const draft: ChatMessage = {
+  const nuevoBorrador = useCallback(
+    (clientId: string, kind: MessageKind, texto: string): ChatMessage | null => {
+      if (!roomId || !profile) return null
+      return {
         id: clientId, // provisional hasta que el servidor confirme
         room_id: roomId,
         sender_id: profile.id,
-        kind: 'text',
+        kind,
         source_lang: profile.lang,
-        source_text: body,
+        source_text: texto,
         translations: {},
         status: 'pending',
         error_detail: null,
         media_url: null,
+        media_name: null,
+        media_mime: null,
+        media_size: null,
+        media_width: null,
+        media_height: null,
         client_id: clientId,
         created_at: new Date().toISOString(),
       }
+    },
+    [roomId, profile],
+  )
+
+  const send = useCallback(
+    async (text: string) => {
+      const body = text.trim()
+      if (!body) return
+      const draft = nuevoBorrador(crypto.randomUUID(), 'text', body)
+      if (!draft) return
 
       setMessages((prev) => [...prev, draft].sort(compareMessages))
       await persist(draft)
     },
-    [roomId, profile, persist],
+    [nuevoBorrador, persist],
+  )
+
+  /**
+   * Adjuntos. La burbuja aparece al instante con la vista previa local; el
+   * fichero sube después y solo entonces se inserta la fila, para que nunca
+   * quede un mensaje apuntando a algo que no llegó a subirse.
+   */
+  const sendFile = useCallback(
+    async (file: File, caption = '') => {
+      if (!roomId || !profile) return
+
+      const clientId = crypto.randomUUID()
+      const esImagenLocal = file.type.startsWith('image/')
+      const draft = nuevoBorrador(
+        clientId,
+        esImagenLocal ? 'image' : 'file',
+        caption.trim(),
+      )
+      if (!draft) return
+
+      const medidas = await medirImagen(file)
+      const preview = esImagenLocal ? URL.createObjectURL(file) : undefined
+
+      const optimista: ChatMessage = {
+        ...draft,
+        media_name: file.name,
+        media_mime: file.type || 'application/octet-stream',
+        media_size: file.size,
+        media_width: medidas?.width ?? null,
+        media_height: medidas?.height ?? null,
+        localPreview: preview,
+        uploading: 0,
+      }
+      setMessages((prev) => [...prev, optimista].sort(compareMessages))
+
+      const path = `${roomId}/${clientId}-${nombreSeguro(file.name)}`
+      const { error: uploadError } = await supabase.storage
+        .from(BUCKET)
+        .upload(path, file, {
+          contentType: optimista.media_mime ?? undefined,
+          upsert: false,
+        })
+
+      if (uploadError) {
+        console.error('No se pudo subir el adjunto', uploadError)
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.client_id === clientId
+              ? {
+                  ...m,
+                  unsent: true,
+                  uploading: 1,
+                  status: 'failed',
+                  error_detail: uploadError.message,
+                }
+              : m,
+          ),
+        )
+        return
+      }
+
+      setMessages((prev) =>
+        prev.map((m) => (m.client_id === clientId ? { ...m, uploading: 1 } : m)),
+      )
+
+      await persist({ ...optimista, media_url: path, uploading: 1 })
+    },
+    [roomId, profile, nuevoBorrador, persist],
   )
 
   const retry = useCallback(
@@ -359,6 +450,7 @@ export function useMessages({ roomId, profile }: Options) {
     connection,
     loadOlder,
     send,
+    sendFile,
     retry,
     sync,
   }

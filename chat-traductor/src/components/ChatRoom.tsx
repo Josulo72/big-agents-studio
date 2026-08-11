@@ -37,6 +37,7 @@ export function ChatRoom({ profile, room, members, onProfileChanged }: Props) {
     connection,
     loadOlder,
     send,
+    sendFile,
     retry,
   } = useMessages({ roomId: room.id, profile })
 
@@ -109,6 +110,7 @@ export function ChatRoom({ profile, room, members, onProfileChanged }: Props) {
           strings={strings}
           lang={profile.lang}
           onSend={(text) => void send(text)}
+          onAttach={(files) => files.forEach((file) => void sendFile(file))}
           onTyping={notifyTyping}
           onStopped={notifyStopped}
         />

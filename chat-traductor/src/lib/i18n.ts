@@ -37,6 +37,7 @@ const strings = {
     notifyInstall: 'Instala la app para recibir avisos',
     yourName: 'Tu nombre',
     options: 'Opciones',
+    attach: 'Adjuntar',
   },
   bg: {
     noRoom: 'Не си член на стая.',
@@ -70,6 +71,7 @@ const strings = {
     notifyInstall: 'Инсталирай приложението, за да получаваш известия',
     yourName: 'Твоето име',
     options: 'Настройки',
+    attach: 'Прикачи',
   },
 } as const
 
